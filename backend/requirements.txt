@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+pydantic>=2.7.0
+python-dotenv
+motor
+pymongo
+redis
+celery
+httpx
+cryptography
