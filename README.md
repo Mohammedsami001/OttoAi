@@ -8,7 +8,7 @@ OttoAi is an AI-powered personal operations dashboard that connects your Google 
 
 | Feature | Description |
 |---------|-------------|
-| **Gmail Intelligence** | AI-powered email summaries using Gemini 2.0 Flash, categorized by topic (Security, Dev Tools, AI, etc). Reply to emails with AI-generated drafts. |
+| **Gmail Intelligence** | AI-powered email summaries using Mistral, with Gemini support as a fallback for summaries and AI-generated replies. Categorized by topic (Security, Dev Tools, AI, etc). |
 | **Calendar & Bookings** | Create events with auto-generated Google Meet links. View, manage, and delete events directly from OttoAi. Status badges (Confirmed / Completed / Cancelled). |
 | **Google Docs** | View your 20 most recent Google Docs with direct edit links and sharing status. |
 | **Smart Subscriptions** | Track recurring expenses (Netflix, Spotify, etc). The background Python agent monitors renewals and sends alerts. |
@@ -22,7 +22,7 @@ OttoAi is an AI-powered personal operations dashboard that connects your Google 
 - **Frontend**: Next.js 15 (App Router), React 19, Tailwind CSS, Framer Motion
 - **Backend**: Python (FastAPI), Motor (async MongoDB driver), Google API client
 - **Database**: MongoDB (local or Atlas)
-- **AI**: Google Gemini 2.0 Flash (email summaries & AI replies)
+- **AI**: Mistral AI with Gemini fallback (email summaries & AI replies)
 - **Auth**: NextAuth.js with Google OAuth 2.0
 - **APIs**: Gmail API, Google Calendar API, Google Drive API, Google Docs API
 
@@ -73,7 +73,8 @@ MONGODB_URI=mongodb://localhost:27017
 NEXTAUTH_URL=http://localhost:3001
 NEXTAUTH_SECRET=any_random_secret_string
 
-# Gemini AI (for email summaries & AI replies)
+# AI model config (for email summaries & AI replies)
+MISTRAL_API_KEY=your_mistral_api_key
 GEMINI_API_KEY=your_gemini_api_key
 ```
 
@@ -81,6 +82,7 @@ Create `backend/.env` (if needed):
 
 ```env
 MONGODB_URI=mongodb://localhost:27017
+MISTRAL_API_KEY=your_mistral_api_key
 GEMINI_API_KEY=your_gemini_api_key
 ```
 
@@ -165,7 +167,7 @@ personal-ops-mvp/
 ├── backend/                     # Python FastAPI Backend
 │   ├── main/
 │   │   ├── app.py               # FastAPI application
-│   │   ├── llm.py               # Gemini AI integration
+│   │   ├── llm.py               # Mistral/Gemini AI integration
 │   │   └── services/
 │   │       └── agent.py         # Gmail fetching & processing
 │   ├── requirements.txt
