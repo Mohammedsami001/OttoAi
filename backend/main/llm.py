@@ -1,7 +1,22 @@
 import os
 import logging
+import re
 
 logger = logging.getLogger(__name__)
+
+
+def _clean_ai_summary(text: str) -> str:
+    if not text:
+        return text
+
+    text = re.sub(r"\*\*(.*?)\*\*", r"\1", text)
+    text = re.sub(r"^\s{0,3}#{1,6}\s*", "", text, flags=re.MULTILINE)
+    text = re.sub(r"^\s*[-*_]{3,}\s*$", "", text, flags=re.MULTILINE)
+    text = re.sub(r"^\s*>\s?", "", text, flags=re.MULTILINE)
+    text = text.replace("`", "")
+    text = re.sub(r"^\s*[-*]\s+", "- ", text, flags=re.MULTILINE)
+    text = re.sub(r"\n{3,}", "\n\n", text)
+    return text.strip()
 
 GEMINI_API_KEY = None
 MISTRAL_API_KEY = None
@@ -41,13 +56,15 @@ async def summarize_text(source: str, raw_text: str) -> str:
     if mistral_key:
         try:
             import httpx
-            prompt = f"""You are a smart email assistant. Analyze these {len(lines)} emails and produce a clean, structured briefing.
+            prompt = f"""You are a smart email assistant. Analyze these {len(lines)} emails and produce a clean, structured briefing in plain text.
 
 Rules:
-- Group emails by category (🔒 Security, 🎵 Offers & Promotions, 💻 Developer, 🤖 AI, 📩 Other)
+- Group emails by category: Security, Offers & Promotions, Developer, AI, Other
 - For each category, list key emails with sender name and one-line summary
-- End with a "⚡ Quick Actions" section if any emails need attention
-- Be concise. Max 15 lines total. No filler.
+- End with a Quick Actions section if any emails need attention
+- Be concise. Max 15 lines total. No filler
+- Output must be plain text only
+- Do not use markdown symbols like #, ##, ###, **, __, or ---
 
 Emails:
 {raw_text}"""
@@ -73,7 +90,7 @@ Emails:
                     data = res.json()
                     ai_text = data.get("choices", [{}])[0].get("message", {}).get("content", "")
                     if ai_text:
-                        return ai_text.strip()
+                        return _clean_ai_summary(ai_text)
         except Exception as e:
             logger.warning(f"[LLM] Mistral call failed, using fallback: {e}")
 

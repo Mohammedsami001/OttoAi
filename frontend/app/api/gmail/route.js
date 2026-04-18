@@ -41,6 +41,20 @@ function categorizeEmail(from, subject) {
 }
 
 async function summarizeWithMistral(emails) {
+  const cleanAiSummary = (text) => {
+    if (!text) return null;
+
+    return text
+      .replace(/\*\*(.*?)\*\*/g, "$1")
+      .replace(/^\s{0,3}#{1,6}\s*/gm, "")
+      .replace(/^\s*[-*_]{3,}\s*$/gm, "")
+      .replace(/^\s*>\s?/gm, "")
+      .replace(/`/g, "")
+      .replace(/^\s*[-*]\s+/gm, "- ")
+      .replace(/\n{3,}/g, "\n\n")
+      .trim();
+  };
+
   const mistralApiKey = process.env.MISTRAL_API_KEY || process.env.GEMINI_API_KEY;
   console.log("[Mistral] API key present:", !!mistralApiKey, "| Emails count:", emails.length);
   if (!mistralApiKey) return "⚠️ MISTRAL_API_KEY is not configured.";
@@ -51,13 +65,15 @@ async function summarizeWithMistral(emails) {
   ).join('\n\n');
 
   try {
-    const prompt = `You are a smart email assistant. Analyze these ${emails.length} emails and produce a clean, structured briefing.
+    const prompt = `You are a smart email assistant. Analyze these ${emails.length} emails and produce a clean, structured briefing in plain text.
 
 Rules:
-- Group emails by category (🔒 Security, 🎵 Offers & Promotions, 💻 Developer, 🤖 AI, 📩 Other)
-- For each category, list key emails with sender name and one-line summary
-- End with a "⚡ Quick Actions" section if any emails need attention
-- Be concise. Max 15 lines total. No filler.
+  - Group emails by category: Security, Offers & Promotions, Developer, AI, Other
+  - For each category, list key emails with sender name and one-line summary
+  - End with a Quick Actions section if any emails need attention
+  - Be concise. Max 15 lines total. No filler
+  - Output must be plain text only
+  - Do not use markdown symbols like #, ##, ###, **, __, or ---
 
 Emails:
 ${emailList}`;
@@ -81,7 +97,7 @@ ${emailList}`;
 
     if (res.ok) {
       const data = await res.json();
-      return data.choices?.[0]?.message?.content?.trim() || null;
+      return cleanAiSummary(data.choices?.[0]?.message?.content?.trim()) || null;
     } else {
       console.error("Mistral failed Details:", await res.text());
       return "⚠️ Expected AI summary but the AI engine hit a rate limit or error (Quota exhausted). Please try again later.";

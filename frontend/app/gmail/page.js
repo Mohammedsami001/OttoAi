@@ -37,6 +37,23 @@ function getSenderColor(from) {
   return 'bg-gray-500'
 }
 
+function cleanSummaryText(text) {
+  if (!text) return ''
+
+  return text
+    .replace(/^\s{0,3}#{1,6}\s*/gm, '')
+    .replace(/^\s*[-*_]{3,}\s*$/gm, '')
+    .replace(/\*\*(.*?)\*\*/g, '$1')
+    .replace(/\*(.*?)\*/g, '$1')
+    .replace(/__(.*?)__/g, '$1')
+    .replace(/`/g, '')
+    .replace(/^\s*>\s?/gm, '')
+    .replace(/^\s*\d+\.\s+/gm, (m) => m.trim())
+    .replace(/^\s*[-+*]\s+/gm, '- ')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim()
+}
+
 export default function GmailAssistant() {
   const [gmailData, setGmailData] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -268,7 +285,7 @@ export default function GmailAssistant() {
                 <Zap className="w-4 h-4 text-blue-600" />
                 <span className="text-sm font-semibold text-blue-900">AI Summary</span>
               </div>
-              <p className="text-sm text-blue-900/80 leading-relaxed whitespace-pre-wrap font-medium">{gmailData.ai_summary}</p>
+              <p className="text-sm text-blue-900/80 leading-relaxed whitespace-pre-wrap font-medium">{cleanSummaryText(gmailData.ai_summary)}</p>
             </div>
           )}
 
