@@ -55,8 +55,17 @@ async function summarizeWithGemini(emails) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          contents: [{ parts: [{ text: `You are an email assistant. Provide a brief 2-3 sentence summary of this inbox overview, highlighting the most important emails that need attention.\n\nEmails:\n${emailList}` }] }],
-          generationConfig: { maxOutputTokens: 150, temperature: 0.3 }
+          contents: [{ parts: [{ text: `You are a smart email assistant. Analyze these ${emails.length} emails and produce a clean, structured briefing.
+
+Rules:
+- Group emails by category (🔒 Security, 🎵 Offers & Promotions, 💻 Developer, 🤖 AI, 📩 Other)
+- For each category, list key emails with sender name and one-line summary
+- End with a "⚡ Quick Actions" section if any emails need attention
+- Be concise. Max 15 lines total. No filler.
+
+Emails:
+${emailList}` }] }],
+          generationConfig: { maxOutputTokens: 500, temperature: 0.3 }
         })
       }
     );
