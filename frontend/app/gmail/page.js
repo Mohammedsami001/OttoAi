@@ -71,12 +71,8 @@ export default function GmailAssistant() {
     setIsRefreshing(true)
     setRefreshStatus(null)
     try {
-      const res = await fetch('http://localhost:8000/agent/trigger-gmail', { method: 'POST' })
-      const data = await res.json()
-      if (data.status === 'completed') {
-        setRefreshStatus('success')
-        await loadData()
-      } else { setRefreshStatus('error') }
+      await loadData()
+      setRefreshStatus('success')
     } catch (e) { setRefreshStatus('error') }
     finally {
       setIsRefreshing(false)
