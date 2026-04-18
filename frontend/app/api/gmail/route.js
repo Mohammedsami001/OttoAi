@@ -42,7 +42,9 @@ function categorizeEmail(from, subject) {
 
 async function summarizeWithGemini(emails) {
   const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey || emails.length === 0) return null;
+  console.log("[Gemini] API key present:", !!apiKey, "| Emails count:", emails.length);
+  if (!apiKey) return "⚠️ GEMINI_API_KEY is not configured. Add it to your Vercel environment variables.";
+  if (emails.length === 0) return null;
 
   const emailList = emails.slice(0, 15).map((e, i) => 
     `${i + 1}. From: ${e.from}\n   Subject: ${e.subject}\n   Snippet: ${e.snippet}`
@@ -72,9 +74,14 @@ ${emailList}` }] }],
     if (res.ok) {
       const data = await res.json();
       return data.candidates?.[0]?.content?.parts?.[0]?.text || null;
+    } else {
+      console.error("Gemini failed Details:", await res.text());
+      return "⚠️ Expected AI summary but the AI engine hit a rate limit or error (Quota exhausted). Please try again later.";
     }
-  } catch (e) { console.error("Gemini summary failed:", e); }
-  return null;
+  } catch (e) { 
+    console.error("Gemini summary failed:", e); 
+    return "⚠️ Failed to connect to AI engine.";
+  }
 }
 
 export async function GET(req) {
