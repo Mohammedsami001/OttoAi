@@ -32,10 +32,7 @@ export default function Login() {
           Sign in to your account
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
-          Or{' '}
-          <Link href="/signup" className="font-medium text-black hover:text-gray-800 underline decoration-gray-300 hover:decoration-black transition-colors">
-            create a new account
-          </Link>
+          New user? Sign in with Google to create your account
         </p>
       </div>
 
