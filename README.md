@@ -14,17 +14,30 @@ OttoAi is an AI-powered personal operations dashboard that connects your Google 
 | **Smart Subscriptions** | Track recurring expenses (Netflix, Spotify, etc). The background Python agent monitors renewals and sends alerts. |
 | **Event Types** | Create reusable meeting templates (e.g., "30-min Coffee Chat") with quick-book capability. |
 | **Profile Management** | Edit your profile, manage integrations, and control settings. |
+| **AI Orchestration Backend** | FastAPI + worker layer that coordinates LLM calls, token refresh, integration sync, retries, and automation-ready workflows. |
+| **Google Fit Daily Steps** | Reads step aggregates from Google Fitness API with reconnect/error diagnostics and per-user OAuth handling. |
+
+---
+
+## Backend AI + Integration Architecture
+
+OttoAi is not just a UI layer. The backend is designed as an orchestration core that handles LLM reasoning and multi-app execution.
+
+- **LLM pipeline**: Route-level AI features (email summaries, reply generation, smart formatting) are handled through a dedicated model layer with provider fallback support.
+- **Integration gateway**: Google service adapters (Gmail, Calendar, Docs/Drive, Fitness) run behind authenticated API routes with scoped access and token refresh.
+- **Automation workers**: Background workers support scheduled/async processing for operational tasks like recurring checks, reminders, and integration-heavy jobs.
+- **Resilience by default**: Defensive parsing, recoverable error payloads, reconnect flows, and retry-friendly endpoint design for real-user reliability.
 
 ---
 
 ## Tech Stack
 
 - **Frontend**: Next.js 15 (App Router), React 19, Tailwind CSS, Framer Motion
-- **Backend**: Python (FastAPI), Motor (async MongoDB driver), Google API client
+- **Backend**: Python (FastAPI), Celery workers, Motor (async MongoDB driver), Google API clients
 - **Database**: MongoDB (local or Atlas)
-- **AI**: Mistral AI with Gemini fallback (email summaries & AI replies)
+- **AI**: Mistral AI with Gemini fallback (email summaries, contextual replies, and backend AI routing)
 - **Auth**: NextAuth.js with Google OAuth 2.0
-- **APIs**: Gmail API, Google Calendar API, Google Drive API, Google Docs API
+- **APIs**: Gmail API, Google Calendar API, Google Drive API, Google Docs API, Google Fitness API
 
 ---
 
@@ -38,6 +51,7 @@ OttoAi is an AI-powered personal operations dashboard that connects your Google 
   - Google Calendar API
   - Google Drive API
   - Google Docs API
+  - Google Fitness API (`fitness.googleapis.com`) for Daily Steps
 
 ---
 
@@ -90,7 +104,7 @@ GEMINI_API_KEY=your_gemini_api_key
 
 1. Go to [Google Cloud Console](https://console.cloud.google.com)
 2. Create a project (or use existing)
-3. Enable APIs: **Gmail API**, **Google Calendar API**, **Google Drive API**, **Google Docs API**
+5. Enable APIs: **Gmail API**, **Google Calendar API**, **Google Drive API**, **Google Docs API**, **Google Fitness API**
 4. Create **OAuth 2.0 Client ID** (Web application):
    - Authorized redirect URI: `http://localhost:3001/api/auth/callback/google`
 5. Copy the Client ID and Client Secret into your `.env.local`
@@ -201,6 +215,7 @@ OttoAi requests the following Google OAuth scopes:
 - `calendar` — Full calendar access (create, read, delete events)
 - `documents` — Read Google Docs
 - `drive.readonly` — List Google Docs from Drive
+- `fitness.activity.read` — Read daily step activity for the dashboard
 
 > **Note**: If a feature stops working, sign out and sign back in to re-grant all scopes.
 
