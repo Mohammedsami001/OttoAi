@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { CalendarDays, FileText, Inbox, Link2, Activity, RefreshCw, Sparkles } from 'lucide-react'
 import { MiniChart } from '../../components/ui/mini-chart'
 import { AnalyticsOverview } from '../../components/ui/analytics-overview'
+import { HealthCard } from '../../components/ui/health-card'
 
 const integrationIds = ['google-calendar', 'google-meet', 'gmail', 'google-docs']
 
@@ -21,22 +22,27 @@ export default function DashboardPage() {
     integrationsOn: 0,
   })
   const [installedApps, setInstalledApps] = useState(null)
+  const [healthData, setHealthData] = useState(null)
+  const [healthLoading, setHealthLoading] = useState(false)
+  const [healthError, setHealthError] = useState(null)
 
   const loadDashboard = async () => {
     setIsLoading(true)
 
     try {
-      const [prefsRes, gmailRes, docsRes, bookingsRes] = await Promise.all([
+      const [prefsRes, gmailRes, docsRes, bookingsRes, healthRes] = await Promise.all([
         fetch('/api/user/preferences'),
         fetch('/api/gmail'),
         fetch('/api/google/docs'),
         fetch('/api/calendar/events'),
+        fetch('/api/health'),
       ])
 
       const prefsData = await prefsRes.json().catch(() => ({}))
       const gmailData = await gmailRes.json().catch(() => ({}))
       const docsData = await docsRes.json().catch(() => ({}))
       const bookingsData = await bookingsRes.json().catch(() => ({}))
+      const healthData = await healthRes.json().catch(() => ({}))
 
       const apps = Array.isArray(prefsData?.user?.installed_apps)
         ? prefsData.user.installed_apps
@@ -49,6 +55,14 @@ export default function DashboardPage() {
         upcomingEvents: Array.isArray(bookingsData?.events) ? bookingsData.events.length : 0,
         integrationsOn: apps.length,
       })
+      
+      if (healthData?.stats) {
+        setHealthData(healthData.stats)
+        setHealthError(null)
+      } else if (healthData?.error) {
+        setHealthError(healthData.error)
+        setHealthData(null)
+      }
     } catch (error) {
       console.error(error)
     } finally {
@@ -126,6 +140,8 @@ export default function DashboardPage() {
           </div>
         ))}
       </div>
+
+      <HealthCard stats={healthData} loading={healthLoading} error={healthError} />
 
       <div className="grid gap-6 lg:grid-cols-[340px,1fr]">
         <MiniChart title="Automation Index" suffix="%" data={chartData} />
