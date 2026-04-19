@@ -3,6 +3,17 @@ import { getServerSession } from "next-auth/next"
 import { authOptions } from "../auth/[...nextauth]/route"
 import clientPromise from "../../../lib/mongodb"
 
+function parseGoogleApiError(errorText) {
+  try {
+    const parsed = JSON.parse(errorText)
+    const message = parsed?.error?.message || ""
+    const reasons = (parsed?.error?.errors || []).map((err) => String(err?.reason || ""))
+    return { message, reasons }
+  } catch {
+    return { message: errorText || "", reasons: [] }
+  }
+}
+
 async function refreshAccessToken(account, db) {
   try {
     const res = await fetch("https://oauth2.googleapis.com/token", {
@@ -123,14 +134,36 @@ export async function GET(req) {
       }
 
       if (fitnessResponse.status === 403) {
-        const missingScope = fitError.includes("insufficientPermissions")
+        const parsedError = parseGoogleApiError(fitError)
+        const combined = `${parsedError.message} ${parsedError.reasons.join(" ")} ${fitError}`.toLowerCase()
+        const missingScope =
+          combined.includes("insufficientpermissions") ||
+          combined.includes("insufficient authentication scopes") ||
+          combined.includes("scope")
+        const apiDisabled =
+          combined.includes("accessnotconfigured") ||
+          combined.includes("has not been used in project") ||
+          combined.includes("api has not been used") ||
+          combined.includes("is disabled")
+
+        if (apiDisabled) {
+          return Response.json(
+            {
+              connected: false,
+              needsReauth: false,
+              error: "Google Fitness API is disabled for this Google Cloud project. Enable Google Fitness API in the same project as your OAuth client.",
+            },
+            { status: 200 }
+          )
+        }
+
         return Response.json(
           {
             connected: false,
             needsReauth: missingScope,
             error: missingScope
               ? "Missing Google Fit permission. Reconnect Google Fit to grant fitness scope."
-              : "Google Fit API permission denied.",
+              : "Google Fit API permission denied. Verify Google Fitness API is enabled and OAuth app scopes are approved.",
           },
           { status: 200 }
         )

@@ -29,7 +29,7 @@ export function MiniChart({
 
   if (loading) {
     return (
-      <div className="group relative w-full min-w-0 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+      <div className="group relative h-full min-h-[230px] w-full min-w-0 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
         <div className="mb-6 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="h-2 w-2 animate-pulse rounded-full bg-emerald-500" />
@@ -58,7 +58,7 @@ export function MiniChart({
         setHoveredIndex(null)
       }}
       className={cn(
-        "group relative w-full min-w-0 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm transition-all duration-500 hover:border-gray-300",
+        "group relative h-full min-h-[230px] w-full min-w-0 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm transition-all duration-500 hover:border-gray-300",
         className,
       )}
     >

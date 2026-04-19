@@ -3,6 +3,11 @@ import { Skeleton } from "boneyard-js/react"
 
 export function HealthCard({ stats, loading, error, connected, needsReauth, onReconnect }) {
   const showSkeleton = loading && connected === null && !error && !stats
+  const canReconnect = !connected && (
+    needsReauth ||
+    !error ||
+    /expired|not connected|missing/i.test(String(error || ""))
+  )
 
   if (showSkeleton) {
     return (
@@ -10,7 +15,7 @@ export function HealthCard({ stats, loading, error, connected, needsReauth, onRe
         name="health-card"
         loading
         fallback={
-          <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+          <div className="h-full min-h-[230px] rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
             <div className="h-5 w-28 rounded bg-gray-200 mb-4" />
             <div className="h-16 rounded bg-gray-100 mb-4" />
             <div className="grid grid-cols-2 gap-4">
@@ -20,14 +25,14 @@ export function HealthCard({ stats, loading, error, connected, needsReauth, onRe
           </div>
         }
       >
-        <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm" />
+        <div className="h-full min-h-[230px] rounded-xl border border-gray-200 bg-white p-6 shadow-sm" />
       </Skeleton>
     )
   }
 
   if (!connected || error) {
     return (
-      <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+      <div className="h-full min-h-[230px] rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
         <div className="flex items-center gap-2 mb-3">
           <Activity className="h-4 w-4 text-gray-500" />
           <h3 className="text-sm font-semibold text-gray-900">Daily Steps</h3>
@@ -35,7 +40,7 @@ export function HealthCard({ stats, loading, error, connected, needsReauth, onRe
         <p className="text-xs text-gray-500">
           {error || "Connect Google Fit to track steps"}
         </p>
-        {typeof onReconnect === "function" && !connected && (
+        {typeof onReconnect === "function" && canReconnect && (
           <button
             onClick={onReconnect}
             className="mt-3 inline-flex items-center rounded-md bg-gray-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-gray-800"
@@ -52,7 +57,7 @@ export function HealthCard({ stats, loading, error, connected, needsReauth, onRe
   }
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+    <div className="h-full min-h-[230px] rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
       <div className="flex items-center justify-between mb-4">
         <div>
           <div className="flex items-center gap-2">
