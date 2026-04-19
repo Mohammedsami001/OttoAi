@@ -8,6 +8,17 @@ function reportRows(reportResponse) {
   return Array.isArray(report?.rows) ? report.rows : []
 }
 
+function getDimension(row, index = 0, fallback = "") {
+  const value = row?.dimensionValues?.[index]?.value ?? row?.dimensions?.[index]
+  return typeof value === "string" ? value : fallback
+}
+
+function getMetricNumber(row, index = 0) {
+  const raw = row?.metricValues?.[index]?.value ?? row?.metrics?.[index]?.values?.[0]
+  const parsed = Number.parseInt(raw, 10)
+  return Number.isFinite(parsed) ? parsed : 0
+}
+
 function parseServiceAccountKey(rawKey) {
   if (!rawKey) return null
 
@@ -207,15 +218,18 @@ export async function GET(req) {
     // Parse feature usage
     const featureUsage = reportRows(featureUsageResponse)
       ?.map((row) => ({
-        name: row.dimensions[0]?.split("/").pop()?.slice(0, 20) || "page",
-        value: parseInt(row.metrics[0].values[0]) || 0,
+        name: getDimension(row, 0, "page").split("/").pop()?.slice(0, 20) || "page",
+        value: getMetricNumber(row, 0),
       }))
       .filter((item) => item.value > 0)
       .slice(0, 5) || []
 
     // Parse daily users
     const dailyUsage = reportRows(dailyUsersResponse)?.map((row) => {
-      const dateStr = row.dimensions[0]
+      const dateStr = getDimension(row, 0, "")
+      if (!/^\d{8}$/.test(dateStr)) {
+        return { day: "N/A", value: getMetricNumber(row, 0) }
+      }
       const date = new Date(
         dateStr.slice(0, 4),
         parseInt(dateStr.slice(4, 6)) - 1,
@@ -224,31 +238,31 @@ export async function GET(req) {
       const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
       return {
         day: days[date.getDay()],
-        value: parseInt(row.metrics[0].values[0]) || 0,
+        value: getMetricNumber(row, 0),
       }
     }) || []
 
     // Parse browser data
     const browserData = (
       reportRows(browserResponse)?.map((row) => ({
-        name: row.dimensions[0] || "Other",
-        value: parseInt(row.metrics[0].values[0]) || 0,
+        name: getDimension(row, 0, "Other"),
+        value: getMetricNumber(row, 0),
       })) || []
     ).slice(0, 4)
 
     // Parse OS data
     const osData = (
       reportRows(osResponse)?.map((row) => ({
-        name: row.dimensions[0] || "Other",
-        value: parseInt(row.metrics[0].values[0]) || 0,
+        name: getDimension(row, 0, "Other"),
+        value: getMetricNumber(row, 0),
       })) || []
     ).slice(0, 4)
 
     // Parse device data
     const deviceData = reportRows(deviceResponse)?.map((row) => ({
-      name: row.dimensions[0]?.charAt(0).toUpperCase() +
-        row.dimensions[0]?.slice(1) || "Other",
-      value: parseInt(row.metrics[0].values[0]) || 0,
+      name: (getDimension(row, 0, "Other").charAt(0).toUpperCase() +
+        getDimension(row, 0, "Other").slice(1)) || "Other",
+      value: getMetricNumber(row, 0),
     })) || []
 
     return Response.json({
@@ -261,8 +275,15 @@ export async function GET(req) {
   } catch (error) {
     console.error("GA4 Analytics error:", error)
     return Response.json(
-      { error: error.message || "Failed to fetch analytics" },
-      { status: 500 }
+      {
+        error: error.message || "Failed to fetch analytics",
+        featureUsage: [],
+        dailyUsage: [],
+        browserData: [],
+        osData: [],
+        deviceData: [],
+      },
+      { status: 200 }
     )
   }
 }

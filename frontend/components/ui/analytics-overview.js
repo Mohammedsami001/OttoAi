@@ -33,7 +33,7 @@ export function AnalyticsOverview() {
         }
         const analytics = await response.json()
         setData(analytics)
-        setError(null)
+        setError(analytics?.error || null)
       } catch (err) {
         console.error('Analytics fetch error:', err)
         setError(err.message)
