@@ -14,6 +14,18 @@ function parseGoogleApiError(errorText) {
   }
 }
 
+async function getTokenInfo(accessToken) {
+  try {
+    const res = await fetch(
+      `https://oauth2.googleapis.com/tokeninfo?access_token=${encodeURIComponent(accessToken)}`
+    )
+    if (!res.ok) return null
+    return await res.json()
+  } catch {
+    return null
+  }
+}
+
 async function refreshAccessToken(account, db) {
   try {
     const res = await fetch("https://oauth2.googleapis.com/token", {
@@ -94,6 +106,20 @@ export async function GET(req) {
       })
     }
 
+    const tokenInfo = await getTokenInfo(accessToken)
+    const expectedClientId = process.env.GOOGLE_CLIENT_ID || ""
+    const tokenAudience = String(tokenInfo?.aud || "")
+    if (expectedClientId && tokenAudience && tokenAudience !== expectedClientId) {
+      return Response.json(
+        {
+          connected: false,
+          needsReauth: true,
+          error: "Google token was issued for a different OAuth client. Reconnect using the same Google Cloud project client configured in this app.",
+        },
+        { status: 200 }
+      )
+    }
+
     // Fetch steps data from Google Fit API
     // Google Fit API: https://www.googleapis.com/fitness/v1/users/me/dataset:aggregate
     const now = new Date()
@@ -163,7 +189,7 @@ export async function GET(req) {
             needsReauth: missingScope,
             error: missingScope
               ? "Missing Google Fit permission. Reconnect Google Fit to grant fitness scope."
-              : "Google Fit API permission denied. Verify Google Fitness API is enabled and OAuth app scopes are approved.",
+              : parsedError.message || "Google Fit API permission denied. Verify Google Fitness API is enabled and OAuth app scopes are approved.",
           },
           { status: 200 }
         )
