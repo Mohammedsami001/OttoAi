@@ -4,6 +4,14 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "../../auth/[...nextauth]/route";
 import clientPromise from "../../../../lib/mongodb";
 
+function createNoCacheResponse(data, options = {}) {
+  const response = Response.json(data, options)
+  response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
+  response.headers.set('Pragma', 'no-cache')
+  response.headers.set('Expires', '0')
+  return response
+}
+
 async function refreshAccessToken(account, db) {
   try {
     const res = await fetch("https://oauth2.googleapis.com/token", {
