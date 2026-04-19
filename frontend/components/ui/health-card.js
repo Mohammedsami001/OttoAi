@@ -40,7 +40,7 @@ export function HealthCard({ stats, loading, error, connected, needsReauth, onRe
             onClick={onReconnect}
             className="mt-3 inline-flex items-center rounded-md bg-gray-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-gray-800"
           >
-            {needsReauth ? 'Reconnect Google Fit' : 'Try reconnecting'}
+            Reconnect Google Fit
           </button>
         )}
       </div>

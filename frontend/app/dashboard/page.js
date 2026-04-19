@@ -229,7 +229,7 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,3fr)]">
         <HealthCard
           stats={healthData}
           loading={healthLoading}

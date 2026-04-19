@@ -66,17 +66,22 @@ export const authOptions = {
     },
     async signIn({ user, account }) {
       // Persist tokens into the accounts collection so the Python agent can read them
-      if (account) {
+      if (account && user?.email) {
         const client = await clientPromise;
         const db = client.db("personal-ops");
+        const appUser = await db.collection("users").findOne({ email: user.email });
         const grantedScope = account.access_token
           ? await fetchGoogleGrantedScope(account.access_token)
           : null;
-        // Match by provider + providerAccountId (always strings, avoids ObjectId mismatch)
+        if (appUser?._id) {
+          // Match by user + provider so a fresh reconnect always overwrites the current Google token.
         await db.collection("accounts").updateOne(
-          { provider: account.provider, providerAccountId: account.providerAccountId },
+          { userId: appUser._id, provider: account.provider },
           {
             $set: {
+              userId: appUser._id,
+              provider: account.provider,
+              providerAccountId: account.providerAccountId || account.providerAccountId || appUser._id?.toString?.() || user.email,
               access_token: account.access_token,
               refresh_token: account.refresh_token,
               expires_at: account.expires_at,
@@ -84,8 +89,10 @@ export const authOptions = {
               scope: grantedScope || account.scope || "",
               id_token: account.id_token,
             }
-          }
+          },
+          { upsert: true }
         );
+        }
       }
       return true;
     },
