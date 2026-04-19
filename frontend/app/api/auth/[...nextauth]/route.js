@@ -49,6 +49,28 @@ export const authOptions = {
     })
   ],
   callbacks: {
+    async redirect({ url, baseUrl }) {
+      const externalSignOutUrl = "https://otto-ai.vercel.app/"
+
+      if (url === externalSignOutUrl || url === externalSignOutUrl.slice(0, -1)) {
+        return externalSignOutUrl
+      }
+
+      if (url.startsWith("/")) {
+        return `${baseUrl}${url}`
+      }
+
+      try {
+        const targetUrl = new URL(url)
+        if (targetUrl.origin === baseUrl) {
+          return url
+        }
+      } catch {
+        // Fall through to baseUrl for malformed URLs.
+      }
+
+      return baseUrl
+    },
     async jwt({ token, user, trigger, session }) {
       if (user?.id) {
         token.id = user.id;
