@@ -82,7 +82,7 @@ export function MiniChart({
         </div>
       </div>
 
-      <div className="flex h-24 items-end gap-2">
+      <div className="flex h-24 items-end gap-1 sm:gap-2">
         {data.map((item, index) => {
           const heightPx = (item.value / maxValue) * 96
           const isHovered = hoveredIndex === index
@@ -92,7 +92,7 @@ export function MiniChart({
           return (
             <div
               key={item.label}
-              className="relative flex h-full flex-1 flex-col items-center justify-end"
+              className="relative flex h-full min-w-0 flex-1 flex-col items-center justify-end"
               onMouseEnter={() => setHoveredIndex(index)}
             >
               <div
@@ -112,8 +112,8 @@ export function MiniChart({
                 }}
               />
 
-              <span className={cn("mt-2 text-[10px] font-medium transition-all duration-300", isHovered ? "text-gray-900" : "text-gray-400")}>
-                <span className="block w-full truncate text-center px-0.5" title={item.label}>
+              <span className={cn("mt-2 w-full text-[9px] font-medium leading-tight transition-all duration-300 sm:text-[10px]", isHovered ? "text-gray-900" : "text-gray-400")}>
+                <span className="block w-full truncate px-0.5 text-center" title={item.label}>
                   {item.label}
                 </span>
               </span>
