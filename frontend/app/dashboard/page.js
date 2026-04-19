@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { CalendarDays, FileText, Inbox, Link2, Activity, RefreshCw, Sparkles } from 'lucide-react'
 import { MiniChart } from '../../components/ui/mini-chart'
-import { AnalyticsOverview } from '../../components/ui/analytics-overview'
 import { HealthCard } from '../../components/ui/health-card'
 import { AppUsageCard } from '../../components/ui/app-usage-card'
 
@@ -143,17 +142,27 @@ export default function DashboardPage() {
     return () => window.clearInterval(liveRefresh)
   }, [])
 
+  const hasUsageData = Array.isArray(appUsage) && appUsage.length > 0
+
   const chartData = useMemo(() => {
+    if (hasUsageData) {
+      return appUsage.slice(0, 7).map((item) => ({
+        label: item.app,
+        value: item.totalMinutes,
+      }))
+    }
+
+    const workflowScore = Math.min(100, stats.integrationsOn * 12 + stats.upcomingEvents * 2)
+
     return [
-      { label: 'Mail', value: Math.min(100, Math.max(8, stats.emails * 6)) },
-      { label: 'Docs', value: Math.min(100, Math.max(8, stats.docs * 6)) },
-      { label: 'Meet', value: isEnabled(installedApps, 'google-meet') ? 78 : 12 },
-      { label: 'Cal', value: Math.min(100, Math.max(8, stats.upcomingEvents * 7)) },
-      { label: 'Apps', value: Math.min(100, Math.max(8, stats.integrationsOn * 20)) },
-      { label: 'Flow', value: Math.min(100, Math.max(8, (stats.emails + stats.docs + stats.upcomingEvents) * 3)) },
-      { label: 'Auto', value: isEnabled(installedApps, 'gmail') && isEnabled(installedApps, 'google-calendar') ? 88 : 28 },
+      { label: 'Gmail', value: stats.emails },
+      { label: 'Google Docs', value: stats.docs },
+      { label: 'Calendar Events', value: stats.upcomingEvents },
+      { label: 'Active Integrations', value: stats.integrationsOn },
+      { label: 'Product Touchpoints', value: stats.emails + stats.docs + stats.upcomingEvents },
+      { label: 'Workflow Score', value: workflowScore },
     ]
-  }, [installedApps, stats])
+  }, [appUsage, hasUsageData, stats])
 
   const platformSummary = useMemo(() => {
     return [
@@ -207,7 +216,7 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[340px,1fr]">
-        <MiniChart title="Automation Index" suffix="%" data={chartData} />
+        <MiniChart title="Automation Index" suffix={hasUsageData ? 'm' : ''} data={chartData} />
 
         <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
           <div className="mb-4 flex items-center gap-2">
@@ -243,8 +252,6 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
-
-      <AnalyticsOverview />
     </div>
   )
 }

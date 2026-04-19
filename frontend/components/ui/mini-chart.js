@@ -88,7 +88,9 @@ export function MiniChart({
               />
 
               <span className={cn("mt-2 text-[10px] font-medium transition-all duration-300", isHovered ? "text-gray-900" : "text-gray-400")}>
-                {item.label.charAt(0)}
+                <span className="block w-full truncate text-center px-0.5" title={item.label}>
+                  {item.label}
+                </span>
               </span>
 
               <div

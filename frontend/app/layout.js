@@ -1,7 +1,6 @@
 import "../styles/globals.css"
 import AppShell from "../components/layout/AppShell"
 import AuthProvider from "../components/AuthProvider"
-import GoogleAnalytics from "../components/GoogleAnalytics"
 
 export const metadata = {
   title: "OttoAi - Personal Operations",
@@ -15,7 +14,6 @@ export default function RootLayout({ children }) {
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
-        <GoogleAnalytics />
       </head>
       <body className="font-sans" suppressHydrationWarning>
         <AuthProvider>
