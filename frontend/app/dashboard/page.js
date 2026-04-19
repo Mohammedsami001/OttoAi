@@ -1,8 +1,9 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { CalendarDays, FileText, Inbox, Link2, Activity, RefreshCw } from 'lucide-react'
+import { CalendarDays, FileText, Inbox, Link2, Activity, RefreshCw, Sparkles, BarChart3 } from 'lucide-react'
 import { MiniChart } from '../../components/ui/mini-chart'
+import { AnalyticsOverview } from '../../components/ui/analytics-overview'
 
 const integrationIds = ['google-calendar', 'google-meet', 'gmail', 'google-docs']
 
@@ -71,6 +72,14 @@ export default function DashboardPage() {
     ]
   }, [installedApps, stats])
 
+  const platformSummary = useMemo(() => {
+    return [
+      { label: 'Product touchpoints', value: stats.emails + stats.docs + stats.upcomingEvents },
+      { label: 'Connected apps', value: stats.integrationsOn },
+      { label: 'Workflow score', value: Math.min(100, stats.integrationsOn * 12 + stats.upcomingEvents * 2) },
+    ]
+  }, [stats])
+
   if (isLoading) {
     return (
       <div className="max-w-6xl animate-pulse">
@@ -106,6 +115,18 @@ export default function DashboardPage() {
         <StatCard title="Active Integrations" value={stats.integrationsOn} icon={<Link2 className="h-4 w-4" />} />
       </div>
 
+      <div className="grid gap-4 md:grid-cols-3">
+        {platformSummary.map((item) => (
+          <div key={item.label} className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+            <div className="mb-2 flex items-center gap-2 text-gray-500">
+              <Sparkles className="h-4 w-4" />
+              <p className="text-xs font-semibold uppercase tracking-wide">{item.label}</p>
+            </div>
+            <p className="text-2xl font-bold text-gray-900">{item.value}</p>
+          </div>
+        ))}
+      </div>
+
       <div className="grid gap-6 lg:grid-cols-[340px,1fr]">
         <MiniChart title="Automation Index" suffix="%" data={chartData} />
 
@@ -135,6 +156,22 @@ export default function DashboardPage() {
               enabled={isEnabled(installedApps, 'google-docs')}
               description="AI-powered doc summaries"
             />
+          </div>
+        </div>
+      </div>
+
+      <AnalyticsOverview />
+
+      <div className="rounded-2xl border border-gray-200 bg-gradient-to-br from-gray-900 to-gray-800 p-6 text-white shadow-sm">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white/80">
+              <BarChart3 className="h-3.5 w-3.5" /> Google Analytics roadmap
+            </div>
+            <h3 className="text-xl font-semibold">Live GA4 data can drive these charts once connected.</h3>
+            <p className="mt-2 max-w-2xl text-sm text-white/70">
+              Feature usage, daily active users, browser distribution, OS split, and desktop vs mobile usage are the right GA4 signals for this dashboard.
+            </p>
           </div>
         </div>
       </div>

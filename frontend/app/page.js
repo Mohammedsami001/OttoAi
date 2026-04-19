@@ -37,6 +37,13 @@ const integrationsData = [
   { name: 'And many more', description: 'Coming soon: more integrations are on the roadmap.', iconSrc: 'https://img.icons8.com/ios-glyphs/60/plus-math.png' },
 ]
 
+const marqueePhrases = [
+  'Self-evolving automation',
+  'Designed to adapt',
+  'Workflow intelligence redefined',
+  'Built to keep improving',
+]
+
 export default function Home() {
   const router = useRouter()
   const { status } = useSession()
@@ -134,10 +141,11 @@ export default function Home() {
 
           <div className="relative overflow-hidden py-2">
             <Marquee pauseOnHover duration={24} fade fadeAmount={12} className="py-4">
-              <span className="mx-10 text-2xl font-medium tracking-tight text-gray-700 whitespace-nowrap">Google Calendar</span>
-              <span className="mx-10 text-2xl font-medium tracking-tight text-gray-700 whitespace-nowrap">Google Meet</span>
-              <span className="mx-10 text-2xl font-medium tracking-tight text-gray-700 whitespace-nowrap">Gmail</span>
-              <span className="mx-10 text-2xl font-medium tracking-tight text-gray-700 whitespace-nowrap">Google Docs</span>
+              {marqueePhrases.map((phrase) => (
+                <span key={phrase} className="mx-10 text-2xl font-medium tracking-tight text-gray-700 whitespace-nowrap">
+                  {phrase}
+                </span>
+              ))}
             </Marquee>
           </div>
         </div>
@@ -145,8 +153,8 @@ export default function Home() {
 
       <section id="features" className="bg-white">
         <IntegrationShowcase
-          title="Connect your ~Google~ stack"
-          subtitle="Use what works today, with more integrations coming soon."
+          title="Connect your ~evolving~ stack"
+          subtitle="Use the apps that work today, and grow into the ones that are coming soon."
           illustrationSrc="https://tally.so/images/demo/v2/strategy.png"
           illustrationAlt="Checklist strategy illustration"
           integrations={integrationsData}
