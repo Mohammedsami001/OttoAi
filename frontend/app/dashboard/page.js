@@ -1,10 +1,10 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import { signIn } from 'next-auth/react'
 import { CalendarDays, FileText, Inbox, Link2, Activity, RefreshCw, Sparkles } from 'lucide-react'
 import { MiniChart } from '../../components/ui/mini-chart'
 import { HealthCard } from '../../components/ui/health-card'
-import { AppUsageCard } from '../../components/ui/app-usage-card'
 
 const integrationIds = ['google-calendar', 'google-meet', 'gmail', 'google-docs']
 
@@ -26,9 +26,24 @@ export default function DashboardPage() {
   const [healthLoading, setHealthLoading] = useState(false)
   const [healthError, setHealthError] = useState(null)
   const [healthConnected, setHealthConnected] = useState(false)
+  const [healthNeedsReauth, setHealthNeedsReauth] = useState(false)
   const [appUsage, setAppUsage] = useState(null)
   const [appUsageLoading, setAppUsageLoading] = useState(false)
   const [appUsageError, setAppUsageError] = useState(null)
+
+  const handleReconnectGoogleFit = async () => {
+    await signIn(
+      'google',
+      { callbackUrl: '/dashboard' },
+      {
+        prompt: 'consent',
+        access_type: 'offline',
+        response_type: 'code',
+        scope:
+          'openid email profile https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.send https://www.googleapis.com/auth/documents https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/fitness.activity.read',
+      }
+    )
+  }
 
   const loadLivePanels = async () => {
     setHealthLoading(true)
@@ -46,14 +61,17 @@ export default function DashboardPage() {
       if (healthData?.stats && healthData?.connected) {
         setHealthData(healthData.stats)
         setHealthConnected(true)
+        setHealthNeedsReauth(false)
         setHealthError(null)
       } else if (healthData?.connected === false) {
         setHealthConnected(false)
+        setHealthNeedsReauth(Boolean(healthData?.needsReauth))
         setHealthData(null)
       } else if (healthData?.error) {
         setHealthError(healthData.error)
         setHealthData(null)
         setHealthConnected(false)
+        setHealthNeedsReauth(Boolean(healthData?.needsReauth))
       }
 
       if (appUsageData?.stats) {
@@ -107,14 +125,17 @@ export default function DashboardPage() {
       if (healthData?.stats && healthData?.connected) {
         setHealthData(healthData.stats)
         setHealthConnected(true)
+        setHealthNeedsReauth(false)
         setHealthError(null)
       } else if (healthData?.connected === false) {
         setHealthConnected(false)
+        setHealthNeedsReauth(Boolean(healthData?.needsReauth))
         setHealthData(null)
       } else if (healthData?.error) {
         setHealthError(healthData.error)
         setHealthData(null)
         setHealthConnected(false)
+        setHealthNeedsReauth(Boolean(healthData?.needsReauth))
       }
 
       if (appUsageData?.stats) {
@@ -211,14 +232,18 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <HealthCard stats={healthData} loading={healthLoading} error={healthError} connected={healthConnected} />
-        <AppUsageCard stats={appUsage} loading={appUsageLoading} error={appUsageError} />
+        <HealthCard
+          stats={healthData}
+          loading={healthLoading}
+          error={healthError}
+          connected={healthConnected}
+          needsReauth={healthNeedsReauth}
+          onReconnect={handleReconnectGoogleFit}
+        />
+        <MiniChart title="Automation Index" suffix={hasUsageData ? 'm' : ''} data={chartData} />
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[340px,1fr]">
-        <MiniChart title="Automation Index" suffix={hasUsageData ? 'm' : ''} data={chartData} />
-
-        <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+      <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
           <div className="mb-4 flex items-center gap-2">
             <Activity className="h-4 w-4 text-gray-700" />
             <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-600">Integration Health</h2>
@@ -250,7 +275,6 @@ export default function DashboardPage() {
                 description="Daily steps and health metrics"
               />
           </div>
-        </div>
       </div>
     </div>
   )
