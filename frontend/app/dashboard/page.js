@@ -5,6 +5,7 @@ import { CalendarDays, FileText, Inbox, Link2, Activity, RefreshCw, Sparkles } f
 import { MiniChart } from '../../components/ui/mini-chart'
 import { AnalyticsOverview } from '../../components/ui/analytics-overview'
 import { HealthCard } from '../../components/ui/health-card'
+import { AppUsageCard } from '../../components/ui/app-usage-card'
 
 const integrationIds = ['google-calendar', 'google-meet', 'gmail', 'google-docs']
 
@@ -25,17 +26,22 @@ export default function DashboardPage() {
   const [healthData, setHealthData] = useState(null)
   const [healthLoading, setHealthLoading] = useState(false)
   const [healthError, setHealthError] = useState(null)
+  const [healthConnected, setHealthConnected] = useState(false)
+  const [appUsage, setAppUsage] = useState(null)
+  const [appUsageLoading, setAppUsageLoading] = useState(false)
+  const [appUsageError, setAppUsageError] = useState(null)
 
   const loadDashboard = async () => {
     setIsLoading(true)
 
     try {
-      const [prefsRes, gmailRes, docsRes, bookingsRes, healthRes] = await Promise.all([
+      const [prefsRes, gmailRes, docsRes, bookingsRes, healthRes, appUsageRes] = await Promise.all([
         fetch('/api/user/preferences'),
         fetch('/api/gmail'),
         fetch('/api/google/docs'),
         fetch('/api/calendar/events'),
         fetch('/api/health'),
+        fetch('/api/app-usage'),
       ])
 
       const prefsData = await prefsRes.json().catch(() => ({}))
@@ -43,6 +49,7 @@ export default function DashboardPage() {
       const docsData = await docsRes.json().catch(() => ({}))
       const bookingsData = await bookingsRes.json().catch(() => ({}))
       const healthData = await healthRes.json().catch(() => ({}))
+      const appUsageData = await appUsageRes.json().catch(() => ({}))
 
       const apps = Array.isArray(prefsData?.user?.installed_apps)
         ? prefsData.user.installed_apps
@@ -56,12 +63,24 @@ export default function DashboardPage() {
         integrationsOn: apps.length,
       })
       
-      if (healthData?.stats) {
+      if (healthData?.stats && healthData?.connected) {
         setHealthData(healthData.stats)
+        setHealthConnected(true)
         setHealthError(null)
+      } else if (healthData?.connected === false) {
+        setHealthConnected(false)
+        setHealthData(null)
       } else if (healthData?.error) {
         setHealthError(healthData.error)
         setHealthData(null)
+        setHealthConnected(false)
+      }
+
+      if (appUsageData?.stats) {
+        setAppUsage(appUsageData.stats)
+        setAppUsageError(null)
+      } else if (appUsageData?.error) {
+        setAppUsageError(appUsageData.error)
       }
     } catch (error) {
       console.error(error)
@@ -141,7 +160,10 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      <HealthCard stats={healthData} loading={healthLoading} error={healthError} />
+      <div className="grid gap-4 md:grid-cols-2">
+        <HealthCard stats={healthData} loading={healthLoading} error={healthError} connected={healthConnected} />
+        <AppUsageCard stats={appUsage} loading={appUsageLoading} error={appUsageError} />
+      </div>
 
       <div className="grid gap-6 lg:grid-cols-[340px,1fr]">
         <MiniChart title="Automation Index" suffix="%" data={chartData} />

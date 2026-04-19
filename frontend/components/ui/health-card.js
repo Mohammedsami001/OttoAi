@@ -1,6 +1,6 @@
 import { Activity } from "lucide-react"
 
-export function HealthCard({ stats, loading, error }) {
+export function HealthCard({ stats, loading, error, connected }) {
   if (loading) {
     return (
       <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm animate-pulse">
@@ -10,7 +10,7 @@ export function HealthCard({ stats, loading, error }) {
     )
   }
 
-  if (error) {
+  if (!connected || error) {
     return (
       <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
         <div className="flex items-center gap-2 mb-3">

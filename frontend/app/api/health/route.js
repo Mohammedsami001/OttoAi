@@ -1,21 +1,30 @@
 import { NextResponse as Response } from "next/server"
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "../auth/[...nextauth]/route"
+import clientPromise from "../../../lib/mongodb"
 
 export async function GET(req) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session) {
+    if (!session?.user?.email) {
       return Response.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const accessToken = session.accessToken
-    if (!accessToken) {
-      return Response.json(
-        { error: "No Google access token available. Reconnect Google account." },
-        { status: 401 }
-      )
+    // Get access token from MongoDB accounts collection
+    const client = await clientPromise
+    const db = client.db("personal-ops")
+    const account = await db.collection("accounts").findOne({
+      provider: "google",
+    })
+
+    if (!account?.access_token) {
+      return Response.json({
+        connected: false,
+        error: "Google Fit not connected",
+      })
     }
+
+    const accessToken = account.access_token
 
     // Fetch steps data from Google Fit API
     // Google Fit API: https://www.googleapis.com/fitness/v1/users/me/dataset:aggregate
@@ -85,6 +94,7 @@ export async function GET(req) {
     const today_steps = dailySteps[dailySteps.length - 1]?.steps || 0
 
     return Response.json({
+      connected: true,
       dailySteps,
       stats: {
         totalSteps,
