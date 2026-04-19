@@ -36,6 +36,9 @@ export const authOptions = {
       if (user?.id) {
         token.id = user.id;
       }
+      if (user?.email) {
+        token.email = user.email;
+      }
       if (user?.name) {
         token.name = user.name;
       }
@@ -69,6 +72,9 @@ export const authOptions = {
     async session({ session, token }) {
       if (session?.user && token?.id) {
         session.user.id = token.id;
+      }
+      if (session?.user && token?.email) {
+        session.user.email = token.email;
       }
       if (session?.user && token?.name) {
         session.user.name = token.name;

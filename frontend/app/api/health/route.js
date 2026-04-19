@@ -10,10 +10,19 @@ export async function GET(req) {
       return Response.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Get access token from MongoDB accounts collection
     const client = await clientPromise
     const db = client.db("personal-ops")
+
+    const user = await db.collection("users").findOne({ email: session.user.email })
+    if (!user?._id) {
+      return Response.json({
+        connected: false,
+        error: "Google account not found for current user",
+      })
+    }
+
     const account = await db.collection("accounts").findOne({
+      userId: user._id,
       provider: "google",
     })
 

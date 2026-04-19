@@ -10,6 +10,8 @@ export async function GET(req) {
       return Response.json({ error: "Unauthorized" }, { status: 401 })
     }
 
+    const userId = session?.user?.id || session?.user?.email
+
     const propertyId = process.env.NEXT_PUBLIC_GA4_PROPERTY_ID
     const serviceAccountKey = process.env.GA4_SERVICE_ACCOUNT_KEY
 
@@ -39,9 +41,22 @@ export async function GET(req) {
       },
     })
 
+    const userFilter = userId
+      ? {
+          filter: {
+            fieldName: "userId",
+            stringFilter: {
+              matchType: "EXACT",
+              value: userId,
+            },
+          },
+        }
+      : undefined
+
     // Fetch feature usage (last 30 days)
     const featureUsageResponse = await analyticsDataClient.runReport({
       property: `properties/${propertyId}`,
+      ...userFilter,
       dateRanges: [
         {
           startDate: "30daysAgo",
@@ -64,6 +79,7 @@ export async function GET(req) {
     // Fetch daily active users (last 7 days)
     const dailyUsersResponse = await analyticsDataClient.runReport({
       property: `properties/${propertyId}`,
+      ...userFilter,
       dateRanges: [
         {
           startDate: "7daysAgo",
@@ -85,6 +101,7 @@ export async function GET(req) {
     // Fetch browser data
     const browserResponse = await analyticsDataClient.runReport({
       property: `properties/${propertyId}`,
+      ...userFilter,
       dateRanges: [
         {
           startDate: "30daysAgo",
@@ -107,6 +124,7 @@ export async function GET(req) {
     // Fetch OS data
     const osResponse = await analyticsDataClient.runReport({
       property: `properties/${propertyId}`,
+      ...userFilter,
       dateRanges: [
         {
           startDate: "30daysAgo",
@@ -129,6 +147,7 @@ export async function GET(req) {
     // Fetch device category data
     const deviceResponse = await analyticsDataClient.runReport({
       property: `properties/${propertyId}`,
+      ...userFilter,
       dateRanges: [
         {
           startDate: "30daysAgo",
