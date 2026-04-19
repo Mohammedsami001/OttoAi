@@ -5,6 +5,14 @@ import { getServerSession } from "next-auth/next"
 import { authOptions } from "../auth/[...nextauth]/route"
 import clientPromise from "../../../lib/mongodb"
 
+function createNoCacheResponse(data, options = {}) {
+  const response = Response.json(data, options)
+  response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
+  response.headers.set('Pragma', 'no-cache')
+  response.headers.set('Expires', '0')
+  return response
+}
+
 function parseGoogleApiError(errorText) {
   try {
     const parsed = JSON.parse(errorText)
@@ -81,7 +89,7 @@ export async function GET(req) {
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user?.email) {
-      return Response.json({ error: "Unauthorized" }, { status: 401 })
+      return createNoCacheResponse({ error: "Unauthorized" }, { status: 401 })
     }
 
     const client = await clientPromise
@@ -89,7 +97,7 @@ export async function GET(req) {
 
     const user = await db.collection("users").findOne({ email: session.user.email })
     if (!user?._id) {
-      return Response.json({
+      return createNoCacheResponse({
         connected: false,
         error: "Google account not found for current user",
       })
@@ -101,7 +109,7 @@ export async function GET(req) {
     })
 
     if (!account?.access_token) {
-      return Response.json({
+      return createNoCacheResponse({
         connected: false,
         error: "Google Fit not connected",
       })
@@ -109,7 +117,7 @@ export async function GET(req) {
 
     const accessToken = await getValidToken(account, db)
     if (!accessToken) {
-      return Response.json({
+      return createNoCacheResponse({
         connected: false,
         error: "Google Fit not connected",
       })
@@ -238,7 +246,7 @@ export async function GET(req) {
     const maxSteps = Math.max(...dailySteps.map((d) => d.steps), 0)
     const today_steps = dailySteps[dailySteps.length - 1]?.steps || 0
 
-    return Response.json({
+    return createNoCacheResponse({
       connected: true,
       dailySteps,
       stats: {

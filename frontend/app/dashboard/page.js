@@ -40,6 +40,12 @@ export default function DashboardPage() {
   const loadLivePanels = async () => {
     setHealthLoading(true)
     setAppUsageLoading(true)
+    // Reset state to show loading indicators
+    setHealthConnected(null)
+    setHealthData(null)
+    setHealthError(null)
+    setAppUsage(null)
+    setAppUsageError(null)
 
     try {
       const [healthRes, appUsageRes] = await Promise.all([
@@ -85,6 +91,13 @@ export default function DashboardPage() {
     setIsLoading(true)
     setHealthLoading(true)
     setAppUsageLoading(true)
+    // Reset states to show loading indicators
+    setIntegrationStatus({ calendar: null, meet: null, gmail: null, docs: null })
+    setHealthConnected(null)
+    setHealthData(null)
+    setHealthError(null)
+    setAppUsage(null)
+    setAppUsageError(null)
 
     try {
       const [prefsRes, gmailRes, docsRes, bookingsRes, healthRes, appUsageRes] = await Promise.all([

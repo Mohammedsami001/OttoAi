@@ -5,18 +5,26 @@ import { getServerSession } from "next-auth/next"
 import { authOptions } from "../auth/[...nextauth]/route"
 import clientPromise from "../../../lib/mongodb"
 
+function createNoCacheResponse(data, options = {}) {
+  const response = Response.json(data, options)
+  response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
+  response.headers.set('Pragma', 'no-cache')
+  response.headers.set('Expires', '0')
+  return response
+}
+
 export async function POST(req) {
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user?.email) {
-      return Response.json({ error: "Unauthorized" }, { status: 401 })
+      return createNoCacheResponse({ error: "Unauthorized" }, { status: 401 })
     }
 
     const body = await req.json()
     const { appName, duration = 0 } = body
 
     if (!appName) {
-      return Response.json({ error: "App name required" }, { status: 400 })
+      return createNoCacheResponse({ error: "App name required" }, { status: 400 })
     }
 
     // Log app usage to MongoDB
@@ -30,10 +38,10 @@ export async function POST(req) {
       timestamp: new Date(),
     })
 
-    return Response.json({ success: true })
+    return createNoCacheResponse({ success: true })
   } catch (error) {
     console.error("App usage logging error:", error)
-    return Response.json(
+    return createNoCacheResponse(
       { error: error.message || "Failed to log app usage" },
       { status: 500 }
     )
@@ -79,14 +87,14 @@ export async function GET(req) {
       accessCount: item.count,
     })).filter((item) => String(item.app || "").toLowerCase() !== "settings")
 
-    return Response.json({
+    return createNoCacheResponse({
       stats,
       totalApps: stats.length,
       period: "last 24 hours",
     })
   } catch (error) {
     console.error("App usage fetch error:", error)
-    return Response.json({
+    return createNoCacheResponse({
       stats: [],
       totalApps: 0,
       period: "last 24 hours",
