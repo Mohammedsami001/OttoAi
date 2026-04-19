@@ -6,13 +6,6 @@ import { CalendarDays, FileText, Inbox, Link2, Activity, RefreshCw, Sparkles } f
 import { MiniChart } from '../../components/ui/mini-chart'
 import { HealthCard } from '../../components/ui/health-card'
 
-const integrationIds = ['google-calendar', 'google-meet', 'gmail', 'google-docs']
-
-function isEnabled(installedApps, id) {
-  if (!Array.isArray(installedApps)) return true
-  return installedApps.includes(id)
-}
-
 export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [stats, setStats] = useState({
@@ -21,7 +14,12 @@ export default function DashboardPage() {
     upcomingEvents: 0,
     integrationsOn: 0,
   })
-  const [installedApps, setInstalledApps] = useState(null)
+  const [integrationStatus, setIntegrationStatus] = useState({
+    calendar: null,
+    meet: null,
+    gmail: null,
+    docs: null,
+  })
   const [healthData, setHealthData] = useState(null)
   const [healthLoading, setHealthLoading] = useState(false)
   const [healthError, setHealthError] = useState(null)
@@ -31,7 +29,7 @@ export default function DashboardPage() {
   const [appUsageLoading, setAppUsageLoading] = useState(false)
   const [appUsageError, setAppUsageError] = useState(null)
 
-  const handleReconnectGoogleFit = async () => {
+  const handleReconnectPermissions = async () => {
     await signIn(
       'google',
       { callbackUrl: '/dashboard' },
@@ -111,16 +109,22 @@ export default function DashboardPage() {
       const healthData = await healthRes.json().catch(() => ({}))
       const appUsageData = await appUsageRes.json().catch(() => ({}))
 
-      const apps = Array.isArray(prefsData?.user?.installed_apps)
-        ? prefsData.user.installed_apps
-        : integrationIds
+      const gmailConnected = Array.isArray(gmailData?.summary?.emails) && !gmailData?.error
+      const docsConnected = Array.isArray(docsData?.docs) && !docsData?.error
+      const calendarConnected = Array.isArray(bookingsData?.events) && !bookingsData?.error
 
-      setInstalledApps(apps)
+      setIntegrationStatus({
+        calendar: calendarConnected,
+        meet: calendarConnected,
+        gmail: gmailConnected,
+        docs: docsConnected,
+      })
+
       setStats({
         emails: Array.isArray(gmailData?.summary?.emails) ? gmailData.summary.emails.length : 0,
         docs: Array.isArray(docsData?.docs) ? docsData.docs.length : 0,
         upcomingEvents: Array.isArray(bookingsData?.events) ? bookingsData.events.length : 0,
-        integrationsOn: apps.length,
+        integrationsOn: 0,
       })
       
       if (healthData?.stats && healthData?.connected) {
@@ -165,33 +169,58 @@ export default function DashboardPage() {
     return () => window.clearInterval(liveRefresh)
   }, [])
 
+  const connectedIntegrationsCount = useMemo(() => {
+    const coreCount = [
+      integrationStatus.calendar,
+      integrationStatus.meet,
+      integrationStatus.gmail,
+      integrationStatus.docs,
+    ].filter(Boolean).length
+    const fitConnected = healthConnected === true ? 1 : 0
+    return coreCount + fitConnected
+  }, [integrationStatus, healthConnected])
+
+  const needsIntegrationReconnect = useMemo(() => {
+    if (isLoading) return false
+
+    const statuses = [
+      integrationStatus.calendar,
+      integrationStatus.meet,
+      integrationStatus.gmail,
+      integrationStatus.docs,
+      healthConnected,
+    ]
+
+    return statuses.some((status) => status === false) || healthNeedsReauth
+  }, [integrationStatus, healthConnected, healthNeedsReauth, isLoading])
+
   const chartData = useMemo(() => {
     const filteredUsage = Array.isArray(appUsage)
       ? appUsage.filter((item) => String(item?.app || '').toLowerCase() !== 'settings')
       : []
 
     const usageMap = new Map(filteredUsage.map((item) => [item.app, item.totalMinutes]))
-    const workflowScore = Math.min(100, stats.integrationsOn * 12 + stats.upcomingEvents * 2)
+    const workflowScore = Math.min(100, connectedIntegrationsCount * 12 + stats.upcomingEvents * 2)
 
     return [
       { label: 'Gmail', value: usageMap.get('Gmail') ?? stats.emails },
       { label: 'Google Docs', value: usageMap.get('Google Docs') ?? stats.docs },
       { label: 'Calendar Events', value: stats.upcomingEvents },
-      { label: 'Active Integrations', value: stats.integrationsOn },
+      { label: 'Active Integrations', value: connectedIntegrationsCount },
       { label: 'Product Touchpoints', value: stats.emails + stats.docs + stats.upcomingEvents },
       { label: 'Workflow Score', value: workflowScore },
     ]
-  }, [appUsage, stats])
+  }, [appUsage, stats, connectedIntegrationsCount])
 
   const hasUsageData = Array.isArray(appUsage) && appUsage.some((item) => String(item?.app || '').toLowerCase() !== 'settings')
 
   const platformSummary = useMemo(() => {
     return [
       { label: 'Product touchpoints', value: stats.emails + stats.docs + stats.upcomingEvents },
-      { label: 'Connected apps', value: stats.integrationsOn },
-      { label: 'Workflow score', value: Math.min(100, stats.integrationsOn * 12 + stats.upcomingEvents * 2) },
+      { label: 'Connected apps', value: connectedIntegrationsCount },
+      { label: 'Workflow score', value: Math.min(100, connectedIntegrationsCount * 12 + stats.upcomingEvents * 2) },
     ]
-  }, [stats])
+  }, [stats, connectedIntegrationsCount])
 
   return (
     <div className="max-w-6xl space-y-8">
@@ -212,7 +241,7 @@ export default function DashboardPage() {
         <StatCard title="Inbox Messages" value={stats.emails} icon={<Inbox className="h-4 w-4" />} loading={isLoading} />
         <StatCard title="Google Docs" value={stats.docs} icon={<FileText className="h-4 w-4" />} loading={isLoading} />
         <StatCard title="Upcoming Events" value={stats.upcomingEvents} icon={<CalendarDays className="h-4 w-4" />} loading={isLoading} />
-        <StatCard title="Active Integrations" value={stats.integrationsOn} icon={<Link2 className="h-4 w-4" />} loading={isLoading} />
+        <StatCard title="Active Integrations" value={connectedIntegrationsCount} icon={<Link2 className="h-4 w-4" />} loading={isLoading} />
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
@@ -238,7 +267,7 @@ export default function DashboardPage() {
           error={healthError}
           connected={healthConnected}
           needsReauth={healthNeedsReauth}
-          onReconnect={handleReconnectGoogleFit}
+          onReconnect={handleReconnectPermissions}
         />
         <MiniChart
           title="Automation Index"
@@ -250,34 +279,49 @@ export default function DashboardPage() {
       </div>
 
       <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-          <div className="mb-4 flex items-center gap-2">
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
             <Activity className="h-4 w-4 text-gray-700" />
             <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-600">Integration Health</h2>
+            </div>
+            {needsIntegrationReconnect && (
+              <button
+                onClick={handleReconnectPermissions}
+                className="inline-flex items-center rounded-md bg-gray-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-gray-800"
+              >
+                Reconnect Permissions
+              </button>
+            )}
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
             <IntegrationRow
               name="Google Calendar"
-              enabled={isEnabled(installedApps, 'google-calendar')}
+              enabled={integrationStatus.calendar === true}
+              loading={isLoading || integrationStatus.calendar === null}
               description="Scheduling and conflict checks"
             />
             <IntegrationRow
               name="Google Meet"
-              enabled={isEnabled(installedApps, 'google-meet')}
+              enabled={integrationStatus.meet === true}
+              loading={isLoading || integrationStatus.meet === null}
               description="Meeting links for bookings"
             />
             <IntegrationRow
               name="Gmail"
-              enabled={isEnabled(installedApps, 'gmail')}
+              enabled={integrationStatus.gmail === true}
+              loading={isLoading || integrationStatus.gmail === null}
               description="Inbox summaries and smart replies"
             />
             <IntegrationRow
               name="Google Docs"
-              enabled={isEnabled(installedApps, 'google-docs')}
+              enabled={integrationStatus.docs === true}
+              loading={isLoading || integrationStatus.docs === null}
               description="AI-powered doc summaries"
             />
               <IntegrationRow
                 name="Google Fit"
                 enabled={healthConnected}
+                loading={healthLoading && healthConnected === null}
                 description="Daily steps and health metrics"
               />
           </div>
@@ -310,14 +354,18 @@ function StatCard({ title, value, icon, loading }) {
   )
 }
 
-function IntegrationRow({ name, enabled, description }) {
+function IntegrationRow({ name, enabled, description, loading = false }) {
   return (
     <div className="rounded-xl border border-gray-100 bg-gray-50 p-4">
       <div className="mb-1 flex items-center justify-between">
         <p className="text-sm font-semibold text-gray-900">{name}</p>
-        <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${enabled ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
-          {enabled ? 'On' : 'Off'}
-        </span>
+        {loading ? (
+          <span className="rounded-full bg-gray-200 px-2 py-0.5 text-xs font-medium text-gray-500 animate-pulse">Loading</span>
+        ) : (
+          <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${enabled ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
+            {enabled ? 'On' : 'Off'}
+          </span>
+        )}
       </div>
       <p className="text-xs text-gray-500">{description}</p>
     </div>
