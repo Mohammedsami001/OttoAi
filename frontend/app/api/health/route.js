@@ -172,12 +172,17 @@ export async function GET(req) {
           combined.includes("api has not been used") ||
           combined.includes("is disabled")
 
+        const projectMatch = String(parsedError.message || fitError || "").match(/project\s+(\d+)/i)
+        const projectHint = projectMatch?.[1] || null
+
         if (apiDisabled) {
           return Response.json(
             {
               connected: false,
               needsReauth: false,
-              error: "Google Fitness API is disabled for this Google Cloud project. Enable Google Fitness API in the same project as your OAuth client.",
+              error: projectHint
+                ? `Google Fitness API appears disabled for project ${projectHint}. Enable Google Fitness API in the exact project that owns your OAuth client ID.`
+                : "Google Fitness API appears disabled for this Google Cloud project. Enable Google Fitness API in the exact project that owns your OAuth client ID.",
             },
             { status: 200 }
           )
