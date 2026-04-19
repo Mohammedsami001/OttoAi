@@ -2,7 +2,6 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
 import { ArrowRight } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useSession } from 'next-auth/react'
@@ -33,7 +32,6 @@ const integrationsData = [
   { name: 'Google Meet', description: 'Live now: automatic Meet link creation.', iconSrc: 'https://img.icons8.com/color/48/google-meet--v1.png' },
   { name: 'Google Docs', description: 'Live now: document listing and AI summaries.', iconSrc: 'https://img.icons8.com/color/48/google-docs--v1.png' },
   { name: 'Google Analytics', description: 'Planned: traffic, engagement, and conversion metrics.', iconSrc: 'https://cdn.worldvectorlogo.com/logos/google-analytics-3.svg' },
-  { name: 'Zapier', description: 'Coming soon: no-code automation workflows.', iconSrc: 'https://cdn.worldvectorlogo.com/logos/zapier.svg' },
   { name: 'Slack', description: 'Coming soon: alerting and team notifications.', iconSrc: 'https://cdn.worldvectorlogo.com/logos/slack-new-logo.svg' },
   { name: 'Notion', description: 'Coming soon: notes and workspace sync.', iconSrc: 'https://cdn.worldvectorlogo.com/logos/notion-2.svg' },
   { name: 'And many more', description: 'Coming soon: more integrations are on the roadmap.', iconSrc: 'https://img.icons8.com/ios-glyphs/60/plus-math.png' },
@@ -43,11 +41,13 @@ export default function Home() {
   const router = useRouter()
   const { status } = useSession()
 
-  useEffect(() => {
+  const handleAuthClick = () => {
     if (status === 'authenticated') {
-      router.replace('/dashboard')
+      router.push('/dashboard')
+      return
     }
-  }, [status, router])
+    router.push('/login')
+  }
 
   return (
     <div className="min-h-screen bg-white text-gray-900 selection:bg-gray-200">
@@ -72,15 +72,15 @@ export default function Home() {
               <Link href="#blog" className="text-sm font-medium text-gray-600 hover:text-black transition-colors">Blog</Link>
             </div>
             <div className="flex items-center gap-4">
-              <Link href="/login" className="text-sm font-medium text-gray-600 hover:text-black transition-colors hidden sm:block">
+              <button onClick={handleAuthClick} className="text-sm font-medium text-gray-600 hover:text-black transition-colors hidden sm:block">
                 Log in
-              </Link>
-              <Link 
-                href="/login" 
+              </button>
+              <button
+                onClick={handleAuthClick}
                 className="bg-black text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-800 transition-colors"
               >
                 Sign up
-              </Link>
+              </button>
             </div>
           </div>
         </div>
@@ -109,7 +109,7 @@ export default function Home() {
           
           <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-center justify-center gap-4 max-w-md mx-auto">
             <button 
-              onClick={() => router.push('/login')}
+              onClick={handleAuthClick}
               className="bg-black text-white px-8 py-3.5 rounded-lg font-medium hover:bg-gray-800 transition-colors flex items-center justify-center gap-2 shadow-sm text-base"
             >
               Get Started <ArrowRight className="w-4 h-4" />
