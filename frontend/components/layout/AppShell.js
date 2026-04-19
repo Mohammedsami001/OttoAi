@@ -33,7 +33,7 @@ export default function AppShell({ children }) {
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar Navigation */}
-      <aside className="hidden md:flex w-64 border-r border-gray-200 bg-gray-50 flex-col">
+      <aside className="hidden md:flex w-64 h-screen sticky top-0 border-r border-gray-200 bg-gray-50 flex-col">
         <div className="p-4 px-6 flex items-center gap-2">
           <div className="w-6 h-6 bg-black rounded-md flex items-center justify-center">
             <span className="text-white text-xs font-bold">O</span>
@@ -41,7 +41,7 @@ export default function AppShell({ children }) {
           <span className="font-semibold text-gray-900">OttoAi</span>
         </div>
         
-        <nav className="flex-1 px-4 py-4 space-y-1">
+        <nav className="flex-1 overflow-y-auto px-4 py-4 space-y-1">
           {nav.map((item) => {
             const active = pathname === item.href || (pathname.startsWith(item.href) && item.href !== "/dashboard")
             return (

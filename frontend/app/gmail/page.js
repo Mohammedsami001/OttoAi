@@ -17,12 +17,23 @@ function extractSenderEmail(from) {
 
 function getTimeAgo(dateStr) {
   if (!dateStr) return ''
-  const diff = Date.now() - new Date(dateStr).getTime()
+  const diff = Math.max(0, Date.now() - new Date(dateStr).getTime())
   const mins = Math.floor(diff / 60000)
   if (mins < 60) return `${mins}m ago`
   const hours = Math.floor(mins / 60)
   if (hours < 24) return `${hours}h ago`
   return `${Math.floor(hours / 24)}d ago`
+}
+
+function formatEmailDate(dateStr) {
+  if (!dateStr) return 'Unknown date'
+  const parsed = new Date(dateStr)
+  if (Number.isNaN(parsed.getTime())) return 'Unknown date'
+  return parsed.toLocaleDateString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric'
+  })
 }
 
 function getSenderColor(from) {
@@ -312,8 +323,9 @@ export default function GmailAssistant() {
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between gap-2">
                               <span className="text-sm font-semibold text-gray-900 truncate">{senderName}</span>
-                              <span className="text-xs text-gray-400 flex-shrink-0">
-                                {isExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                              <span className="text-xs text-gray-500 flex-shrink-0 text-right inline-flex items-center gap-2">
+                                <span>{formatEmailDate(email.date)}</span>
+                                {isExpanded ? <ChevronUp className="w-3 h-3 text-gray-400" /> : <ChevronDown className="w-3 h-3 text-gray-400" />}
                               </span>
                             </div>
                             <p className="text-sm text-gray-800 truncate font-medium">{email.subject}</p>
