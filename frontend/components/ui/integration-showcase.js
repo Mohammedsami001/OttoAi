@@ -6,10 +6,10 @@ import { cn } from "../../lib/utils"
 function HighlightedTitle({ text }) {
   const parts = text.split(/~/)
   return (
-    <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+    <h2 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
       {parts.map((part, index) =>
         index === 1 ? (
-          <span key={`${part}-${index}`} className="relative whitespace-nowrap text-gray-900">
+          <span key={`${part}-${index}`} className="relative whitespace-nowrap text-gray-900 dark:text-white">
             <span className="relative">{part}</span>
             <svg
               aria-hidden="true"
@@ -67,10 +67,10 @@ export function IntegrationShowcase({
         <div className="grid grid-cols-1 items-start gap-x-12 gap-y-10 lg:grid-cols-2">
           <div className="max-w-xl">
             <HighlightedTitle text={title} />
-            <p className="mt-4 text-base text-gray-600 sm:text-lg">{subtitle}</p>
+            <p className="mt-4 text-base text-gray-600 sm:text-lg dark:text-gray-400">{subtitle}</p>
           </div>
           <div className="flex items-center justify-center lg:justify-center">
-            <img src={illustrationSrc} alt={illustrationAlt} className="h-auto w-64 object-contain" />
+            <img src={illustrationSrc} alt={illustrationAlt} className="h-auto w-64 object-contain dark:invert" />
           </div>
         </div>
 
@@ -82,13 +82,13 @@ export function IntegrationShowcase({
           viewport={{ once: true, amount: 0.2 }}
         >
           {integrations.map((item) => (
-            <motion.div key={item.name} variants={itemVariants} className="flex items-start space-x-4 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-              <div className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-md bg-gray-50">
-                <img src={item.iconSrc} alt={`${item.name} logo`} className="h-5 w-5 object-contain" />
+            <motion.div key={item.name} variants={itemVariants} className="flex items-start space-x-4 rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:bg-black dark:border-gray-800">
+              <div className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-md bg-transparent">
+                <img src={item.iconSrc} alt={`${item.name} logo`} className={`h-5 w-5 object-contain ${item.invertDark ? 'dark:brightness-0 dark:invert' : ''}`} />
               </div>
               <div>
-                <h3 className="text-sm font-semibold text-gray-900">{item.name}</h3>
-                <p className="mt-1 text-sm text-gray-500">{item.description}</p>
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white">{item.name}</h3>
+                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{item.description}</p>
               </div>
             </motion.div>
           ))}

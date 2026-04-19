@@ -5,6 +5,7 @@ const config = {
     "./components/**/*.{js,jsx}",
     "./hooks/**/*.{js,jsx}"
   ],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
