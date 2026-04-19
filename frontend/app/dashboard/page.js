@@ -163,19 +163,6 @@ export default function DashboardPage() {
     ]
   }, [stats])
 
-  if (isLoading) {
-    return (
-      <div className="max-w-6xl animate-pulse">
-        <div className="mb-6 h-8 w-60 rounded bg-gray-200" />
-        <div className="grid gap-4 md:grid-cols-4">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-24 rounded-xl bg-gray-100" />
-          ))}
-        </div>
-      </div>
-    )
-  }
-
   return (
     <div className="max-w-6xl space-y-8">
       <div className="flex items-center justify-between border-b border-gray-200 pb-4">
@@ -192,10 +179,10 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-4">
-        <StatCard title="Inbox Messages" value={stats.emails} icon={<Inbox className="h-4 w-4" />} />
-        <StatCard title="Google Docs" value={stats.docs} icon={<FileText className="h-4 w-4" />} />
-        <StatCard title="Upcoming Events" value={stats.upcomingEvents} icon={<CalendarDays className="h-4 w-4" />} />
-        <StatCard title="Active Integrations" value={stats.integrationsOn} icon={<Link2 className="h-4 w-4" />} />
+        <StatCard title="Inbox Messages" value={stats.emails} icon={<Inbox className="h-4 w-4" />} loading={isLoading} />
+        <StatCard title="Google Docs" value={stats.docs} icon={<FileText className="h-4 w-4" />} loading={isLoading} />
+        <StatCard title="Upcoming Events" value={stats.upcomingEvents} icon={<CalendarDays className="h-4 w-4" />} loading={isLoading} />
+        <StatCard title="Active Integrations" value={stats.integrationsOn} icon={<Link2 className="h-4 w-4" />} loading={isLoading} />
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
@@ -205,7 +192,11 @@ export default function DashboardPage() {
               <Sparkles className="h-4 w-4" />
               <p className="text-xs font-semibold uppercase tracking-wide">{item.label}</p>
             </div>
-            <p className="text-2xl font-bold text-gray-900">{item.value}</p>
+            {isLoading ? (
+              <div className="h-8 w-16 rounded bg-gray-100" />
+            ) : (
+              <p className="text-2xl font-bold text-gray-900">{item.value}</p>
+            )}
           </div>
         ))}
       </div>
@@ -258,7 +249,19 @@ export default function DashboardPage() {
   )
 }
 
-function StatCard({ title, value, icon }) {
+function StatCard({ title, value, icon, loading }) {
+  if (loading) {
+    return (
+      <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+        <div className="mb-2 flex items-center justify-between text-gray-500">
+          <p className="text-xs font-semibold uppercase tracking-wide">{title}</p>
+          {icon}
+        </div>
+        <div className="h-8 w-16 rounded bg-gray-100" />
+      </div>
+    )
+  }
+
   return (
     <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
       <div className="mb-2 flex items-center justify-between text-gray-500">

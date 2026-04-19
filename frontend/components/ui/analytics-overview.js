@@ -27,7 +27,10 @@ export function AnalyticsOverview() {
       try {
         setLoading(true)
         const response = await fetch('/api/analytics')
-        if (!response.ok) throw new Error('Failed to fetch analytics')
+        if (!response.ok) {
+          const errorBody = await response.json().catch(() => ({}))
+          throw new Error(errorBody?.error || 'Failed to fetch analytics')
+        }
         const analytics = await response.json()
         setData(analytics)
         setError(null)
@@ -78,7 +81,7 @@ export function AnalyticsOverview() {
       <section className="space-y-4 rounded-2xl border border-yellow-200 bg-yellow-50 p-6 shadow-sm">
         <div>
           <h2 className="text-lg font-semibold text-yellow-900">Google Analytics</h2>
-          <p className="text-sm text-yellow-700">Configuration needed: Check that GA4_SERVICE_ACCOUNT_KEY is set in .env.local</p>
+          <p className="text-sm text-yellow-700">{error}</p>
         </div>
       </section>
     )

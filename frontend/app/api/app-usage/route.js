@@ -73,7 +73,7 @@ export async function GET(req) {
     // Convert to more readable format
     const stats = appUsage.map((item) => ({
       app: item._id,
-      totalMinutes: Math.round(item.totalDuration / 60),
+      totalMinutes: item.totalDuration > 0 ? Math.max(1, Math.ceil(item.totalDuration / 60)) : 0,
       accessCount: item.count,
     }))
 

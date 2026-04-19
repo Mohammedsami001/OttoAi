@@ -30,7 +30,9 @@ export function HealthCard({ stats, loading, error, connected }) {
           <Activity className="h-4 w-4 text-gray-500" />
           <h3 className="text-sm font-semibold text-gray-900">Daily Steps</h3>
         </div>
-        <p className="text-xs text-gray-500">Connect Google Fit to track steps</p>
+        <p className="text-xs text-gray-500">
+          {error || "Connect Google Fit to track steps"}
+        </p>
       </div>
     )
   }

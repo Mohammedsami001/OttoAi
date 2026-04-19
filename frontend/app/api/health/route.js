@@ -115,14 +115,30 @@ export async function GET(req) {
     )
 
     if (!fitnessResponse.ok) {
+      const fitError = await fitnessResponse.text()
       if (fitnessResponse.status === 401) {
         return Response.json(
-          { error: "Google Fit access expired. Please reconnect." },
+          { connected: false, error: "Google Fit access expired. Please reconnect.", needsReauth: true },
           { status: 401 }
         )
       }
+
+      if (fitnessResponse.status === 403) {
+        const missingScope = fitError.includes("insufficientPermissions")
+        return Response.json(
+          {
+            connected: false,
+            needsReauth: missingScope,
+            error: missingScope
+              ? "Missing Google Fit permission. Sign out and sign in again to grant fitness scope."
+              : "Google Fit API permission denied.",
+          },
+          { status: 403 }
+        )
+      }
+
       return Response.json(
-        { error: "Failed to fetch Google Fit data" },
+        { connected: false, error: `Failed to fetch Google Fit data (${fitnessResponse.status})` },
         { status: 500 }
       )
     }

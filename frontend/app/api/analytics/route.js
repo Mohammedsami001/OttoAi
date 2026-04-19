@@ -3,6 +3,28 @@ import { getServerSession } from "next-auth/next"
 import { authOptions } from "../auth/[...nextauth]/route"
 import { BetaAnalyticsDataClient } from "@google-analytics/data"
 
+function parseServiceAccountKey(rawKey) {
+  if (!rawKey) return null
+
+  const candidates = [rawKey, rawKey.trim(), rawKey.replace(/\\n/g, "\n")]
+
+  for (const candidate of candidates) {
+    try {
+      return JSON.parse(candidate)
+    } catch {
+      // try next format
+    }
+  }
+
+  // Handle accidental wrapping quotes from env dashboards
+  const stripped = rawKey.trim().replace(/^['"]|['"]$/g, "")
+  try {
+    return JSON.parse(stripped)
+  } catch {
+    return null
+  }
+}
+
 export async function GET(req) {
   try {
     const session = await getServerSession(authOptions)
@@ -23,12 +45,10 @@ export async function GET(req) {
     }
 
     // Parse the service account key from environment variable
-    let serviceAccount
-    try {
-      serviceAccount = JSON.parse(serviceAccountKey)
-    } catch (e) {
+    const serviceAccount = parseServiceAccountKey(serviceAccountKey)
+    if (!serviceAccount?.client_email || !serviceAccount?.private_key) {
       return Response.json(
-        { error: "Invalid GA4 service account key" },
+        { error: "Invalid GA4_SERVICE_ACCOUNT_KEY format" },
         { status: 500 }
       )
     }
