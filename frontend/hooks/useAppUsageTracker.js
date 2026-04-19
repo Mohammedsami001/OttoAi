@@ -6,7 +6,6 @@ const APP_NAMES = {
   '/calendar': 'Google Calendar',
   '/docs': 'Google Docs',
   '/bookings': 'Bookings',
-  '/settings': 'Settings',
   '/profile': 'Profile',
   '/spending': 'Spending',
   '/dashboard': 'Dashboard',

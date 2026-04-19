@@ -18,6 +18,7 @@ export function MiniChart({
   suffix = "%",
   data = defaultData,
   loading = false,
+  loadingBars = 6,
   className,
 }) {
   const [hoveredIndex, setHoveredIndex] = useState(null)
@@ -38,8 +39,8 @@ export function MiniChart({
         </div>
 
         <div className="flex h-36 items-end gap-2">
-          {defaultData.map((item, index) => (
-            <div key={`${item.label}-${index}`} className="relative flex h-full flex-1 flex-col items-center justify-end">
+          {Array.from({ length: loadingBars }).map((_, index) => (
+            <div key={`automation-skeleton-${index}`} className="relative flex h-full flex-1 flex-col items-center justify-end">
               <div className="w-full rounded-full bg-gray-100" style={{ height: `${32 + (index % 4) * 12}px` }} />
               <div className="mt-2 h-2 w-12 rounded bg-gray-100" />
             </div>

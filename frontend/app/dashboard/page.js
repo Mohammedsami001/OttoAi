@@ -163,27 +163,25 @@ export default function DashboardPage() {
     return () => window.clearInterval(liveRefresh)
   }, [])
 
-  const hasUsageData = Array.isArray(appUsage) && appUsage.length > 0
-
   const chartData = useMemo(() => {
-    if (hasUsageData) {
-      return appUsage.slice(0, 7).map((item) => ({
-        label: item.app,
-        value: item.totalMinutes,
-      }))
-    }
+    const filteredUsage = Array.isArray(appUsage)
+      ? appUsage.filter((item) => String(item?.app || '').toLowerCase() !== 'settings')
+      : []
 
+    const usageMap = new Map(filteredUsage.map((item) => [item.app, item.totalMinutes]))
     const workflowScore = Math.min(100, stats.integrationsOn * 12 + stats.upcomingEvents * 2)
 
     return [
-      { label: 'Gmail', value: stats.emails },
-      { label: 'Google Docs', value: stats.docs },
+      { label: 'Gmail', value: usageMap.get('Gmail') ?? stats.emails },
+      { label: 'Google Docs', value: usageMap.get('Google Docs') ?? stats.docs },
       { label: 'Calendar Events', value: stats.upcomingEvents },
       { label: 'Active Integrations', value: stats.integrationsOn },
       { label: 'Product Touchpoints', value: stats.emails + stats.docs + stats.upcomingEvents },
       { label: 'Workflow Score', value: workflowScore },
     ]
-  }, [appUsage, hasUsageData, stats])
+  }, [appUsage, stats])
+
+  const hasUsageData = Array.isArray(appUsage) && appUsage.some((item) => String(item?.app || '').toLowerCase() !== 'settings')
 
   const platformSummary = useMemo(() => {
     return [
@@ -240,14 +238,15 @@ export default function DashboardPage() {
           needsReauth={healthNeedsReauth}
           onReconnect={handleReconnectGoogleFit}
         />
-        <MiniChart
-          title="Automation Index"
-          suffix={hasUsageData ? 'm' : ''}
-          data={chartData}
-          loading={isLoading || (appUsageLoading && !hasUsageData)}
-          className="md:col-span-2"
-        />
       </div>
+
+      <MiniChart
+        title="Automation Index"
+        data={chartData}
+        loading={isLoading || (appUsageLoading && !hasUsageData)}
+        loadingBars={6}
+        className="max-w-none"
+      />
 
       <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
           <div className="mb-4 flex items-center gap-2">

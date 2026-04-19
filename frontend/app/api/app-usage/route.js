@@ -75,7 +75,7 @@ export async function GET(req) {
       app: item._id,
       totalMinutes: item.totalDuration > 0 ? Math.max(1, Math.ceil(item.totalDuration / 60)) : 0,
       accessCount: item.count,
-    }))
+    })).filter((item) => String(item.app || "").toLowerCase() !== "settings")
 
     return Response.json({
       stats,

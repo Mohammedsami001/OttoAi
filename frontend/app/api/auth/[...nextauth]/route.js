@@ -8,6 +8,23 @@ import clientPromise from "../../../../lib/mongodb"
 const NextAuth = NextAuthRaw.default || NextAuthRaw;
 const GoogleProvider = GoogleProviderRaw.default || GoogleProviderRaw;
 
+async function fetchGoogleGrantedScope(accessToken) {
+  try {
+    const res = await fetch(
+      `https://oauth2.googleapis.com/tokeninfo?access_token=${encodeURIComponent(accessToken)}`
+    )
+
+    if (res.ok) {
+      const data = await res.json()
+      return data.scope || null
+    }
+  } catch (error) {
+    console.error("Failed to read Google token scope:", error)
+  }
+
+  return null
+}
+
 export const authOptions = {
   adapter: MongoDBAdapter(clientPromise),
   session: {
@@ -52,6 +69,9 @@ export const authOptions = {
       if (account) {
         const client = await clientPromise;
         const db = client.db("personal-ops");
+        const grantedScope = account.access_token
+          ? await fetchGoogleGrantedScope(account.access_token)
+          : null;
         // Match by provider + providerAccountId (always strings, avoids ObjectId mismatch)
         await db.collection("accounts").updateOne(
           { provider: account.provider, providerAccountId: account.providerAccountId },
@@ -61,7 +81,7 @@ export const authOptions = {
               refresh_token: account.refresh_token,
               expires_at: account.expires_at,
               token_type: account.token_type,
-              scope: account.scope,
+              scope: grantedScope || account.scope || "",
               id_token: account.id_token,
             }
           }
