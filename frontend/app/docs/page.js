@@ -26,7 +26,15 @@ export default function DocsPage() {
   const [loadingSummary, setLoadingSummary] = useState({})
   const [expandedDoc, setExpandedDoc] = useState(null)
 
+  const waitForMinimumSkeleton = async (startedAt, minMs = 600) => {
+    const elapsed = Date.now() - startedAt
+    if (elapsed < minMs) {
+      await new Promise((resolve) => setTimeout(resolve, minMs - elapsed))
+    }
+  }
+
   const loadDocs = async () => {
+    const startedAt = Date.now()
     setIsLoading(true)
     try {
       const res = await fetch('/api/google/docs')
@@ -48,6 +56,7 @@ export default function DocsPage() {
     } catch (e) {
       setError('Failed to fetch documents')
     } finally {
+      await waitForMinimumSkeleton(startedAt)
       setIsLoading(false)
     }
   }

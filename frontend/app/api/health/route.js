@@ -83,7 +83,7 @@ export async function GET(req) {
           needsReauth: true,
           error: "Missing Google Fit permission. Sign out and sign in again to grant fitness scope.",
         },
-        { status: 403 }
+        { status: 200 }
       )
     }
 
@@ -131,7 +131,7 @@ export async function GET(req) {
       if (fitnessResponse.status === 401) {
         return Response.json(
           { connected: false, error: "Google Fit access expired. Please reconnect.", needsReauth: true },
-          { status: 401 }
+          { status: 200 }
         )
       }
 
@@ -145,13 +145,13 @@ export async function GET(req) {
               ? "Missing Google Fit permission. Sign out and sign in again to grant fitness scope."
               : "Google Fit API permission denied.",
           },
-          { status: 403 }
+          { status: 200 }
         )
       }
 
       return Response.json(
         { connected: false, error: `Failed to fetch Google Fit data (${fitnessResponse.status})` },
-        { status: 500 }
+        { status: 200 }
       )
     }
 

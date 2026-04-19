@@ -80,20 +80,29 @@ export default function GmailAssistant() {
   const [isSending, setIsSending] = useState(false)
   const [sendStatus, setSendStatus] = useState(null) // 'success' | 'error'
 
+  const waitForMinimumSkeleton = async (startedAt, minMs = 600) => {
+    const elapsed = Date.now() - startedAt
+    if (elapsed < minMs) {
+      await new Promise((resolve) => setTimeout(resolve, minMs - elapsed))
+    }
+  }
+
   const loadData = async () => {
+    const startedAt = Date.now()
+    setIsLoading(true)
     try {
       const resGmail = await fetch('/api/gmail')
       const dataGmail = await resGmail.json()
       if (dataGmail.summary) setGmailData(dataGmail.summary)
     } catch (e) { console.error(e) }
+    finally {
+      await waitForMinimumSkeleton(startedAt)
+      setIsLoading(false)
+    }
   }
 
   useEffect(() => {
-    async function init() {
-      await loadData()
-      setIsLoading(false)
-    }
-    init()
+    loadData()
   }, [])
 
   const handleForceRefresh = async () => {

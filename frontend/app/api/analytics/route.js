@@ -3,6 +3,11 @@ import { getServerSession } from "next-auth/next"
 import { authOptions } from "../auth/[...nextauth]/route"
 import { BetaAnalyticsDataClient } from "@google-analytics/data"
 
+function reportRows(reportResponse) {
+  const report = Array.isArray(reportResponse) ? reportResponse[0] : reportResponse
+  return Array.isArray(report?.rows) ? report.rows : []
+}
+
 function parseServiceAccountKey(rawKey) {
   if (!rawKey) return null
 
@@ -40,7 +45,7 @@ export async function GET(req) {
     if (!propertyId || !serviceAccountKey) {
       return Response.json(
         { error: "GA4 credentials not configured" },
-        { status: 500 }
+        { status: 200 }
       )
     }
 
@@ -49,7 +54,7 @@ export async function GET(req) {
     if (!serviceAccount?.client_email || !serviceAccount?.private_key) {
       return Response.json(
         { error: "Invalid GA4_SERVICE_ACCOUNT_KEY format" },
-        { status: 500 }
+        { status: 200 }
       )
     }
 
@@ -200,7 +205,7 @@ export async function GET(req) {
     })
 
     // Parse feature usage
-    const featureUsage = featureUsageResponse[0].rows
+    const featureUsage = reportRows(featureUsageResponse)
       ?.map((row) => ({
         name: row.dimensions[0]?.split("/").pop()?.slice(0, 20) || "page",
         value: parseInt(row.metrics[0].values[0]) || 0,
@@ -209,7 +214,7 @@ export async function GET(req) {
       .slice(0, 5) || []
 
     // Parse daily users
-    const dailyUsage = dailyUsersResponse[0].rows?.map((row) => {
+    const dailyUsage = reportRows(dailyUsersResponse)?.map((row) => {
       const dateStr = row.dimensions[0]
       const date = new Date(
         dateStr.slice(0, 4),
@@ -225,7 +230,7 @@ export async function GET(req) {
 
     // Parse browser data
     const browserData = (
-      browserResponse[0].rows?.map((row) => ({
+      reportRows(browserResponse)?.map((row) => ({
         name: row.dimensions[0] || "Other",
         value: parseInt(row.metrics[0].values[0]) || 0,
       })) || []
@@ -233,14 +238,14 @@ export async function GET(req) {
 
     // Parse OS data
     const osData = (
-      osResponse[0].rows?.map((row) => ({
+      reportRows(osResponse)?.map((row) => ({
         name: row.dimensions[0] || "Other",
         value: parseInt(row.metrics[0].values[0]) || 0,
       })) || []
     ).slice(0, 4)
 
     // Parse device data
-    const deviceData = deviceResponse[0].rows?.map((row) => ({
+    const deviceData = reportRows(deviceResponse)?.map((row) => ({
       name: row.dimensions[0]?.charAt(0).toUpperCase() +
         row.dimensions[0]?.slice(1) || "Other",
       value: parseInt(row.metrics[0].values[0]) || 0,
