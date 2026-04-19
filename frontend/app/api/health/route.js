@@ -45,23 +45,6 @@ async function getValidToken(account, db) {
   return account.access_token || null
 }
 
-async function getGoogleGrantedScope(accessToken) {
-  try {
-    const res = await fetch(
-      `https://oauth2.googleapis.com/tokeninfo?access_token=${encodeURIComponent(accessToken)}`
-    )
-
-    if (res.ok) {
-      const data = await res.json()
-      return data.scope || null
-    }
-  } catch (error) {
-    console.error("Google token scope lookup failed:", error)
-  }
-
-  return null
-}
-
 export async function GET(req) {
   try {
     const session = await getServerSession(authOptions)
@@ -90,19 +73,6 @@ export async function GET(req) {
         connected: false,
         error: "Google Fit not connected",
       })
-    }
-
-    const grantedScope = (await getGoogleGrantedScope(account.access_token)) || String(account.scope || "")
-    const hasFitnessScope = grantedScope.includes("fitness.activity.read")
-    if (!hasFitnessScope) {
-      return Response.json(
-        {
-          connected: false,
-          needsReauth: true,
-          error: "Missing Google Fit permission. Sign out and sign in again to grant fitness scope.",
-        },
-        { status: 200 }
-      )
     }
 
     const accessToken = await getValidToken(account, db)
@@ -159,7 +129,7 @@ export async function GET(req) {
             connected: false,
             needsReauth: missingScope,
             error: missingScope
-              ? "Missing Google Fit permission. Sign out and sign in again to grant fitness scope."
+              ? "Missing Google Fit permission. Reconnect Google Fit to grant fitness scope."
               : "Google Fit API permission denied.",
           },
           { status: 200 }

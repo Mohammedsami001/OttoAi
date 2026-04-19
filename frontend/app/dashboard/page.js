@@ -66,6 +66,7 @@ export default function DashboardPage() {
       } else if (healthData?.connected === false) {
         setHealthConnected(false)
         setHealthNeedsReauth(Boolean(healthData?.needsReauth))
+        setHealthError(healthData?.error || null)
         setHealthData(null)
       } else if (healthData?.error) {
         setHealthError(healthData.error)
@@ -130,6 +131,7 @@ export default function DashboardPage() {
       } else if (healthData?.connected === false) {
         setHealthConnected(false)
         setHealthNeedsReauth(Boolean(healthData?.needsReauth))
+        setHealthError(healthData?.error || null)
         setHealthData(null)
       } else if (healthData?.error) {
         setHealthError(healthData.error)
@@ -238,15 +240,14 @@ export default function DashboardPage() {
           needsReauth={healthNeedsReauth}
           onReconnect={handleReconnectGoogleFit}
         />
+        <MiniChart
+          title="Automation Index"
+          data={chartData}
+          loading={isLoading || (appUsageLoading && !hasUsageData)}
+          loadingBars={6}
+          className="max-w-none"
+        />
       </div>
-
-      <MiniChart
-        title="Automation Index"
-        data={chartData}
-        loading={isLoading || (appUsageLoading && !hasUsageData)}
-        loadingBars={6}
-        className="max-w-none"
-      />
 
       <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
           <div className="mb-4 flex items-center gap-2">
