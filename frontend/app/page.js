@@ -2,8 +2,10 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { useEffect } from 'react'
 import { ArrowRight, CheckCircle2, Video, Calendar } from 'lucide-react'
 import { motion } from 'framer-motion'
+import { useSession } from 'next-auth/react'
 import { Marquee } from '../components/ui/marquee'
 
 const containerVariants = {
@@ -26,6 +28,13 @@ const fadeVariants = {
 
 export default function Home() {
   const router = useRouter()
+  const { status } = useSession()
+
+  useEffect(() => {
+    if (status === 'authenticated') {
+      router.replace('/dashboard')
+    }
+  }, [status, router])
 
   return (
     <div className="min-h-screen bg-white text-gray-900 selection:bg-gray-200">
