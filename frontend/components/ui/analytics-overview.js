@@ -1,44 +1,11 @@
 "use client"
 
+import { useEffect, useState } from 'react'
 import { BarChart, Bar, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, Tooltip } from 'recharts'
 
-const featureUsage = [
-  { name: 'Gmail', value: 42 },
-  { name: 'Calendar', value: 31 },
-  { name: 'Docs', value: 18 },
-  { name: 'Bookings', value: 27 },
-  { name: 'Profile', value: 9 },
-]
-
-const dailyUsage = [
-  { day: 'Mon', value: 16 },
-  { day: 'Tue', value: 22 },
-  { day: 'Wed', value: 28 },
-  { day: 'Thu', value: 24 },
-  { day: 'Fri', value: 34 },
-  { day: 'Sat', value: 18 },
-  { day: 'Sun', value: 12 },
-]
-
-const browserData = [
-  { name: 'Chrome', value: 62, color: '#2563eb' },
-  { name: 'Safari', value: 18, color: '#0f766e' },
-  { name: 'Firefox', value: 10, color: '#f97316' },
-  { name: 'Edge', value: 10, color: '#7c3aed' },
-]
-
-const osData = [
-  { name: 'macOS', value: 49, color: '#111827' },
-  { name: 'Windows', value: 27, color: '#2563eb' },
-  { name: 'iOS', value: 15, color: '#16a34a' },
-  { name: 'Android', value: 9, color: '#f59e0b' },
-]
-
-const deviceData = [
-  { name: 'Desktop', value: 68, color: '#111827' },
-  { name: 'Mobile', value: 28, color: '#2563eb' },
-  { name: 'Tablet', value: 4, color: '#94a3b8' },
-]
+const defaultBrowserColors = { Chrome: '#2563eb', Safari: '#0f766e', Firefox: '#f97316', Edge: '#7c3aed' }
+const defaultOsColors = { macOS: '#111827', Windows: '#2563eb', iOS: '#16a34a', Android: '#f59e0b' }
+const defaultDeviceColors = { desktop: '#111827', mobile: '#2563eb', tablet: '#94a3b8' }
 
 function chartTooltipStyle() {
   return {
@@ -50,6 +17,68 @@ function chartTooltipStyle() {
 }
 
 export function AnalyticsOverview() {
+  const [data, setData] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    const fetchAnalytics = async () => {
+      try {
+        setLoading(true)
+        const response = await fetch('/api/analytics')
+        if (!response.ok) throw new Error('Failed to fetch analytics')
+        const analytics = await response.json()
+        setData(analytics)
+        setError(null)
+      } catch (err) {
+        console.error('Analytics fetch error:', err)
+        setError(err.message)
+        setData(null)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchAnalytics()
+  }, [])
+
+  if (loading) {
+    return (
+      <section className="space-y-4 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm animate-pulse">
+        <div className="h-6 bg-gray-200 rounded w-1/3" />
+        <div className="h-64 bg-gray-100 rounded" />
+      </section>
+    )
+  }
+
+  if (error) {
+    return (
+      <section className="space-y-4 rounded-2xl border border-yellow-200 bg-yellow-50 p-6 shadow-sm">
+        <div>
+          <h2 className="text-lg font-semibold text-yellow-900">Google Analytics</h2>
+          <p className="text-sm text-yellow-700">Configuration needed: Check that GA4_SERVICE_ACCOUNT_KEY is set in .env.local</p>
+        </div>
+      </section>
+    )
+  }
+
+  const featureUsage = data?.featureUsage || []
+  const dailyUsage = data?.dailyUsage || []
+  const browserData = (data?.browserData || []).map((item) => ({
+    ...item,
+    color: defaultBrowserColors[item.name] || '#9ca3af',
+  }))
+  const osData = (data?.osData || []).map((item) => ({
+    ...item,
+    color: defaultOsColors[item.name] || '#9ca3af',
+  }))
+  const deviceData = (data?.deviceData || []).map((item) => ({
+    ...item,
+    color:
+      defaultDeviceColors[item.name?.toLowerCase()] ||
+      defaultDeviceColors[item.name] ||
+      '#9ca3af',
+  }))
+
   return (
     <section className="space-y-4 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
       <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
@@ -57,7 +86,7 @@ export function AnalyticsOverview() {
           <h2 className="text-lg font-semibold text-gray-900">Google Analytics Overview</h2>
           <p className="text-sm text-gray-500">Feature usage, daily tracking, browser mix, OS mix, and device split.</p>
         </div>
-        <p className="text-xs font-medium uppercase tracking-wide text-gray-400">Demo layout, ready for GA4 data</p>
+        <p className="text-xs font-medium uppercase tracking-wide text-gray-400">Live GA4 data</p>
       </div>
 
       <div className="grid gap-4 xl:grid-cols-[1.5fr,1fr]">
@@ -65,12 +94,12 @@ export function AnalyticsOverview() {
           <div className="mb-3 flex items-center justify-between">
             <div>
               <p className="text-sm font-semibold text-gray-900">Feature usage</p>
-              <p className="text-xs text-gray-500">Which product areas users touch most</p>
+              <p className="text-xs text-gray-500">Top pages by event count (30 days)</p>
             </div>
           </div>
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={featureUsage}>
+              <BarChart data={featureUsage.length > 0 ? featureUsage : [{ name: 'No data', value: 0 }]}>
                 <XAxis dataKey="name" tickLine={false} axisLine={false} stroke="#9ca3af" />
                 <YAxis tickLine={false} axisLine={false} stroke="#9ca3af" />
                 <Tooltip contentStyle={chartTooltipStyle()} />
@@ -83,11 +112,11 @@ export function AnalyticsOverview() {
         <div className="rounded-xl border border-gray-100 bg-gray-50 p-4">
           <div className="mb-3">
             <p className="text-sm font-semibold text-gray-900">Daily tracking</p>
-            <p className="text-xs text-gray-500">Activity over the last 7 days</p>
+            <p className="text-xs text-gray-500">Active users over last 7 days</p>
           </div>
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={dailyUsage}>
+              <LineChart data={dailyUsage.length > 0 ? dailyUsage : [{ day: 'N/A', value: 0 }]}>
                 <XAxis dataKey="day" tickLine={false} axisLine={false} stroke="#9ca3af" />
                 <YAxis tickLine={false} axisLine={false} stroke="#9ca3af" />
                 <Tooltip contentStyle={chartTooltipStyle()} />
