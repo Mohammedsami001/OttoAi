@@ -20,7 +20,7 @@ export default function AppShell({ children }) {
   const { data: session } = useSession()
   const isPublicPage = pathname === "/" || pathname === "/login" || pathname === "/signup"
   const [profileOpen, setProfileOpen] = useState(false)
-  const SIGNOUT_REDIRECT_URL = "https://otto-ai.vercel.app/"
+  const SIGNOUT_REDIRECT_URL = "https://otto-ai-frontend.vercel.app/"
 
   if (isPublicPage) {
     return <>{children}</>

@@ -131,7 +131,7 @@ export default function DocsPage() {
             <div>
               <p className="font-semibold text-amber-900">Google Drive permission needed</p>
               <p className="text-sm text-amber-800 mt-1">Sign out and sign back in to grant Drive read access.</p>
-              <button onClick={() => signOut({ callbackUrl: 'https://otto-ai.vercel.app/' })}
+              <button onClick={() => signOut({ callbackUrl: 'https://otto-ai-frontend.vercel.app/' })}
                 className="mt-3 flex items-center gap-2 px-4 py-2 bg-amber-600 text-white rounded-lg text-sm font-medium hover:bg-amber-700 transition-colors shadow-sm">
                 <LogOut className="w-4 h-4" /> Sign Out &amp; Re-authenticate
               </button>

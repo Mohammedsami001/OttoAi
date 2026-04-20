@@ -50,7 +50,7 @@ export const authOptions = {
   ],
   callbacks: {
     async redirect({ url, baseUrl }) {
-      const externalSignOutUrl = "https://otto-ai.vercel.app/"
+      const externalSignOutUrl = "https://otto-ai-frontend.vercel.app/"
 
       if (url === externalSignOutUrl || url === externalSignOutUrl.slice(0, -1)) {
         return externalSignOutUrl
