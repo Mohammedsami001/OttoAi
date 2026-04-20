@@ -18,7 +18,7 @@ const nav = [
 export default function AppShell({ children }) {
   const pathname = usePathname()
   const { data: session } = useSession()
-  const isPublicPage = pathname === "/" || pathname === "/login" || pathname === "/signup"
+  const isPublicPage = pathname === "/" || pathname === "/login" || pathname === "/signup" || pathname === "/pricing"
   const [profileOpen, setProfileOpen] = useState(false)
   const SIGNOUT_REDIRECT_URL = "https://otto-ai-frontend.vercel.app/"
 
