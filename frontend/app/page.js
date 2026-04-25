@@ -8,7 +8,7 @@ import { useSession } from 'next-auth/react'
 import { Marquee } from '../components/ui/marquee'
 import { BackgroundPaths } from '../components/ui/background-paths'
 import { IntegrationShowcase } from '../components/ui/integration-showcase'
-import { LightPullThemeSwitcher } from '../components/ui/light-pull-theme-switcher'
+import { SwitchToggleTheme } from '../components/ui/toggle-theme'
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -60,10 +60,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-white text-gray-900 selection:bg-gray-200 dark:bg-black dark:text-gray-100 dark:selection:bg-gray-800 relative">
-      <div className="absolute top-16 right-8 sm:right-32 z-40">
-        <LightPullThemeSwitcher />
-      </div>
-
+      
       {/* Navigation */}
       <motion.nav 
         initial={{ opacity: 0, y: -10 }}
@@ -81,7 +78,10 @@ export default function Home() {
               <Link href="/pricing" className="text-sm font-medium text-gray-600 hover:text-black transition-colors dark:text-gray-400 dark:hover:text-white">Pricing</Link>
               <Link href="#blog" className="text-sm font-medium text-gray-600 hover:text-black transition-colors dark:text-gray-400 dark:hover:text-white">Blog</Link>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 sm:gap-4">
+              <div className="flex items-center mr-2">
+                <SwitchToggleTheme />
+              </div>
               <button onClick={handleAuthClick} className="text-sm font-medium text-gray-600 hover:text-black transition-colors hidden sm:block dark:text-gray-400 dark:hover:text-white">
                 Log in
               </button>

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { useSession } from 'next-auth/react'
 import Pricing from '../../components/ui/pricing-component'
-import { LightPullThemeSwitcher } from '../../components/ui/light-pull-theme-switcher'
+import { SwitchToggleTheme } from '../../components/ui/toggle-theme'
 
 export default function PricingPage() {
   const router = useRouter()
@@ -22,7 +22,7 @@ export default function PricingPage() {
   return (
     <div className="min-h-screen bg-white text-gray-900 selection:bg-gray-200 dark:bg-black dark:text-gray-100 dark:selection:bg-gray-800 relative">
       <div className="absolute top-16 right-8 sm:right-32 z-40">
-        <LightPullThemeSwitcher />
+        <SwitchToggleTheme />
       </div>
 
       {/* Navigation */}
