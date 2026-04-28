@@ -14,7 +14,7 @@ import {
 
 export function DashboardMockup() {
   return (
-    <div className="w-full max-w-5xl mx-auto h-[550px] bg-[#F8FAFC] dark:bg-[#0B0F19] border border-gray-200/60 dark:border-gray-800/60 rounded-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row text-left font-sans transform-gpu hover:scale-[1.02] transition-transform duration-500 text-[0.9rem]" style={{ zoom: 0.9 }}>
+    <div className="w-full sm:w-[800px] md:w-[900px] lg:w-[1000px] xl:w-[1100px] max-w-none h-[650px] sm:h-[700px] bg-[#F8FAFC] dark:bg-[#0B0F19] border border-gray-200/60 dark:border-gray-800/60 rounded-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row text-left font-sans transform-gpu hover:scale-[1.02] transition-transform duration-500 text-[0.9rem]">
       
       {/* Sidebar */}
       <div className="w-full md:w-56 bg-[#F1F5F9] dark:bg-[#111827] border-r border-gray-200/60 dark:border-gray-800/60 flex flex-col justify-between hidden md:flex">
