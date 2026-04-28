@@ -14,7 +14,7 @@ import {
 
 export function DashboardMockup() {
   return (
-    <div className="w-full max-w-4xl mx-auto bg-[#F8FAFC] dark:bg-[#0B0F19] border border-gray-200/60 dark:border-gray-800/60 rounded-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row text-left font-sans transform-gpu hover:scale-[1.02] transition-transform duration-500">
+    <div className="w-full max-w-4xl mx-auto h-[400px] bg-[#F8FAFC] dark:bg-[#0B0F19] border border-gray-200/60 dark:border-gray-800/60 rounded-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row text-left font-sans transform-gpu hover:scale-[1.02] transition-transform duration-500">
       
       {/* Sidebar */}
       <div className="w-full md:w-56 bg-[#F1F5F9] dark:bg-[#111827] border-r border-gray-200/60 dark:border-gray-800/60 flex flex-col justify-between hidden md:flex">
@@ -34,11 +34,11 @@ export function DashboardMockup() {
         <div className="p-4 border-t border-gray-200/60 dark:border-gray-800/60">
           <div className="flex items-center gap-3 px-2">
             <div className="w-8 h-8 rounded-full bg-black dark:bg-white text-white dark:text-black flex items-center justify-center text-xs font-bold shadow-sm">
-              S
+              J
             </div>
             <div className="flex-1 overflow-hidden">
-              <p className="text-xs font-medium text-gray-900 dark:text-white truncate">SAMI</p>
-              <p className="text-[10px] text-gray-500 dark:text-gray-400 truncate">Free Plan</p>
+              <p className="text-xs font-medium text-gray-900 dark:text-white truncate">John Doe</p>
+              <p className="text-[10px] text-gray-500 dark:text-gray-400 truncate">Pro Plan</p>
             </div>
             <ChevronDown size={14} className="text-gray-400" />
           </div>
@@ -46,7 +46,7 @@ export function DashboardMockup() {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 p-5 md:p-6 overflow-y-auto max-h-[450px] md:max-h-[550px] scrollbar-hide bg-white dark:bg-[#050505]">
+      <div className="flex-1 p-5 md:p-6 bg-white dark:bg-[#050505]">
         <div className="flex justify-between items-start mb-6">
           <div>
             <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-1">Dashboard</h2>
