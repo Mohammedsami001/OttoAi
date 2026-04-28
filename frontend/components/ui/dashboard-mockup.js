@@ -14,39 +14,10 @@ import {
 
 export function DashboardMockup() {
   return (
-    <div className="w-full sm:w-[800px] md:w-[900px] lg:w-[1000px] xl:w-[1100px] max-w-none h-[650px] sm:h-[700px] bg-[#F8FAFC] dark:bg-[#0B0F19] border border-gray-200/60 dark:border-gray-800/60 rounded-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row text-left font-sans transform-gpu hover:scale-[1.02] transition-transform duration-500 text-[0.9rem]">
+    <div className="w-[800px] sm:w-[1000px] lg:w-[1200px] xl:w-[1400px] max-w-none h-[400px] sm:h-[450px] bg-[#F8FAFC] dark:bg-[#0B0F19] border border-gray-200/60 dark:border-gray-800/60 rounded-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row text-left font-sans transform-gpu hover:scale-[1.02] transition-transform duration-500 text-[0.9rem]">
       
-      {/* Sidebar */}
-      <div className="w-full md:w-56 bg-[#F1F5F9] dark:bg-[#111827] border-r border-gray-200/60 dark:border-gray-800/60 flex flex-col justify-between hidden md:flex">
-        <div className="p-4">
-          <div className="flex items-center gap-2 mb-8 px-2 mt-2">
-            <span className="text-base font-bold tracking-tight text-gray-900 dark:text-white">OttoAi</span>
-          </div>
-          <nav className="space-y-1">
-            <NavItem icon={<LayoutDashboard size={16} />} label="Dashboard" active />
-            <NavItem icon={<Mail size={16} />} label="Gmail Summaries" />
-            <NavItem icon={<FileText size={16} />} label="Google Docs" />
-            <NavItem icon={<CreditCard size={16} />} label="Subscriptions" />
-            <NavItem icon={<Calendar size={16} />} label="Bookings" />
-            <NavItem icon={<Settings size={16} />} label="Settings" />
-          </nav>
-        </div>
-        <div className="p-4 border-t border-gray-200/60 dark:border-gray-800/60">
-          <div className="flex items-center gap-3 px-2">
-            <div className="w-8 h-8 rounded-full bg-black dark:bg-white text-white dark:text-black flex items-center justify-center text-xs font-bold shadow-sm">
-              J
-            </div>
-            <div className="flex-1 overflow-hidden">
-              <p className="text-xs font-medium text-gray-900 dark:text-white truncate">John Doe</p>
-              <p className="text-[10px] text-gray-500 dark:text-gray-400 truncate">Pro Plan</p>
-            </div>
-            <ChevronDown size={14} className="text-gray-400" />
-          </div>
-        </div>
-      </div>
-
       {/* Main Content */}
-      <div className="flex-1 p-5 md:p-6 bg-white dark:bg-[#050505]">
+      <div className="flex-1 p-5 md:p-6 md:px-8 bg-white dark:bg-[#050505]">
         <div className="flex justify-between items-start mb-6">
           <div>
             <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-1">Dashboard</h2>
