@@ -53,6 +53,8 @@ export function BackgroundPaths({
     title = "Background Paths",
     subtitle,
     children,
+    layout = "centered",
+    rightContent
 }) {
     const words = title.split(" ");
 
@@ -63,60 +65,125 @@ export function BackgroundPaths({
                 <FloatingPaths position={-1} />
             </div>
 
-            <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 2 }}
-                    className="max-w-4xl mx-auto"
-                >
-                    <h1 className="text-5xl sm:text-7xl font-bold mb-8 tracking-tight text-black dark:text-white max-w-4xl mx-auto">
-                        {words.map((word, wordIndex) => (
-                            <span
-                                key={wordIndex}
-                                className="inline-block mr-3 sm:mr-4 last:mr-0"
-                            >
-                                {word.split("").map((letter, letterIndex) => (
-                                    <motion.span
-                                        key={`${wordIndex}-${letterIndex}`}
-                                        initial={{ y: 100, opacity: 0 }}
-                                        animate={{ y: 0, opacity: 1 }}
-                                        transition={{
-                                            delay:
-                                                wordIndex * 0.1 +
-                                                letterIndex * 0.03,
-                                            type: "spring",
-                                            stiffness: 150,
-                                            damping: 25,
-                                        }}
-                                        className="inline-block"
-                                    >
-                                        {letter}
-                                    </motion.span>
-                                ))}
-                            </span>
-                        ))}
-                    </h1>
-
-                    {subtitle && (
-                        <motion.p
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.8, duration: 0.8 }}
-                            className="text-lg sm:text-xl text-gray-800 font-medium mb-10 max-w-2xl mx-auto dark:text-gray-200"
+            <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+                {layout === "centered" ? (
+                    <div className="text-center">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ duration: 2 }}
+                            className="max-w-4xl mx-auto"
                         >
-                            {subtitle}
-                        </motion.p>
-                    )}
+                            <h1 className="text-5xl sm:text-7xl font-bold mb-8 tracking-tight text-black dark:text-white max-w-4xl mx-auto">
+                                {words.map((word, wordIndex) => (
+                                    <span
+                                        key={wordIndex}
+                                        className="inline-block mr-3 sm:mr-4 last:mr-0"
+                                    >
+                                        {word.split("").map((letter, letterIndex) => (
+                                            <motion.span
+                                                key={`${wordIndex}-${letterIndex}`}
+                                                initial={{ y: 100, opacity: 0 }}
+                                                animate={{ y: 0, opacity: 1 }}
+                                                transition={{
+                                                    delay: wordIndex * 0.1 + letterIndex * 0.03,
+                                                    type: "spring",
+                                                    stiffness: 150,
+                                                    damping: 25,
+                                                }}
+                                                className="inline-block"
+                                            >
+                                                {letter}
+                                            </motion.span>
+                                        ))}
+                                    </span>
+                                ))}
+                            </h1>
 
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 1, duration: 0.8 }}
-                    >
-                        {children}
-                    </motion.div>
-                </motion.div>
+                            {subtitle && (
+                                <motion.p
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.8, duration: 0.8 }}
+                                    className="text-lg sm:text-xl text-gray-800 font-medium mb-10 max-w-2xl mx-auto dark:text-gray-200"
+                                >
+                                    {subtitle}
+                                </motion.p>
+                            )}
+
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 1, duration: 0.8 }}
+                            >
+                                {children}
+                            </motion.div>
+                        </motion.div>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ duration: 2 }}
+                            className="text-left"
+                        >
+                            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold mb-6 tracking-tight text-black dark:text-white">
+                                {words.map((word, wordIndex) => (
+                                    <span
+                                        key={wordIndex}
+                                        className="inline-block mr-3 sm:mr-4 last:mr-0"
+                                    >
+                                        {word.split("").map((letter, letterIndex) => (
+                                            <motion.span
+                                                key={`${wordIndex}-${letterIndex}`}
+                                                initial={{ y: 100, opacity: 0 }}
+                                                animate={{ y: 0, opacity: 1 }}
+                                                transition={{
+                                                    delay: wordIndex * 0.1 + letterIndex * 0.03,
+                                                    type: "spring",
+                                                    stiffness: 150,
+                                                    damping: 25,
+                                                }}
+                                                className="inline-block"
+                                            >
+                                                {letter}
+                                            </motion.span>
+                                        ))}
+                                    </span>
+                                ))}
+                            </h1>
+
+                            {subtitle && (
+                                <motion.p
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.8, duration: 0.8 }}
+                                    className="text-lg sm:text-xl text-gray-800 font-medium mb-8 max-w-xl dark:text-gray-200"
+                                >
+                                    {subtitle}
+                                </motion.p>
+                            )}
+
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 1, duration: 0.8 }}
+                            >
+                                {children}
+                            </motion.div>
+                        </motion.div>
+                        
+                        <motion.div
+                            initial={{ opacity: 0, x: 50 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.5, duration: 1, ease: "easeOut" }}
+                            className="relative w-full flex justify-center lg:justify-end"
+                        >
+                            {rightContent}
+                        </motion.div>
+                    </div>
+                )}
             </div>
         </section>
     );

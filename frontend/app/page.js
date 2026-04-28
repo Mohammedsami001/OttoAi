@@ -9,6 +9,7 @@ import { Marquee } from '../components/ui/marquee'
 import { BackgroundPaths } from '../components/ui/background-paths'
 import { IntegrationShowcase } from '../components/ui/integration-showcase'
 import { SwitchToggleTheme } from '../components/ui/toggle-theme'
+import { DashboardMockup } from '../components/ui/dashboard-mockup'
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -100,8 +101,10 @@ export default function Home() {
       <BackgroundPaths
         title="Your autonomous personal operations platform."
         subtitle="OttoAi connects your Gmail, Calendar, and Meet — then works in the background to summarize your inbox, track subscriptions, and keep you organized."
+        layout="split"
+        rightContent={<DashboardMockup />}
       >
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 max-w-md mx-auto">
+        <div className="flex flex-col sm:flex-row items-start gap-4">
           <button 
             onClick={handleAuthClick}
             className="bg-black text-white px-8 py-3.5 rounded-lg font-medium hover:bg-gray-800 transition-colors flex items-center justify-center gap-2 shadow-sm text-base dark:bg-white dark:text-black dark:hover:bg-gray-200"
