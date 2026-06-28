@@ -28,7 +28,7 @@ async def _user_ids() -> list[str]:
 
 async def _get_spending_snapshot(user_id: str) -> dict:
     repo = get_spending_repo()
-    rows = await repo.get_transactions(user_id)
+    rows = await repo.get_transactions(user_id, limit=1000, sort_by_date=False)
     total = round(sum(item.get("amount", 0) for item in rows), 2)
     by_category: dict[str, float] = {}
     for item in rows:

@@ -15,8 +15,6 @@ class SpendingRepository(BaseRepository):
         docs = await cursor.to_list(limit)
         return docs
 
-    async def fetch_dashboard_data(self, user_id: str) -> dict:
-        return await super().fetch_dashboard_data(user_id)
 
     async def upsert_transaction(self, user_id: str, row: dict):
         return await self.db["spending_transactions"].update_one(

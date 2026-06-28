@@ -56,9 +56,13 @@ async def health() -> dict:
 @app.post("/agent/trigger-gmail")
 async def trigger_gmail_agent() -> dict:
     """Manually trigger the Gmail agent to run immediately."""
-    from main.services.agent import run_gmail_agent
+    from main.services.agent import run_gmail_agent, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET
+    from main.repositories.accounts import get_accounts_repo
+    from main.repositories.agent import get_agent_repo
+    from main.adapters.google_client import GoogleClient
+    
     try:
-        await run_gmail_agent()
+        await run_gmail_agent(get_accounts_repo(), get_agent_repo(), GoogleClient(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET))
         return {"status": "completed", "message": "Gmail agent ran successfully."}
     except Exception as e:
         return {"status": "error", "message": str(e)}
