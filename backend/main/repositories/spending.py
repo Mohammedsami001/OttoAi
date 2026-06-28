@@ -15,5 +15,24 @@ class SpendingRepository(BaseRepository):
         docs = await cursor.to_list(limit)
         return docs
 
+
+    async def upsert_transaction(self, user_id: str, row: dict):
+        return await self.db["spending_transactions"].update_one(
+            {"user_id": user_id, "transaction_id": row["transaction_id"]},
+            {"$setOnInsert": row},
+            upsert=True,
+        )
+
+    async def mark_notification_sent(self, user_id: str, transaction_id: str, message_id: str) -> None:
+        await self.db["spending_transactions"].update_one(
+            {"user_id": user_id, "transaction_id": transaction_id},
+            {
+                "$set": {
+                    "notification_sent": True,
+                    "whatsapp_message_id": message_id,
+                }
+            },
+        )
+
 def get_spending_repo() -> SpendingRepository:
     return SpendingRepository()
