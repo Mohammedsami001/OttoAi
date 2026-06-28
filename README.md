@@ -1,5 +1,7 @@
 # OttoAi — Personal Operations Platform
 
+Website: https://otto-ai.vercel.app/
+
 OttoAi is an AI-powered personal operations dashboard that connects your Google Workspace (Gmail, Calendar, Docs) and provides intelligent automation, email summaries, event management, and subscription tracking.
 
 ---
