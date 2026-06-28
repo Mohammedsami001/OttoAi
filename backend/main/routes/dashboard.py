@@ -23,7 +23,7 @@ async def dashboard_summary(
 ):
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
-    spending_docs = await spending_repo.get_transactions(user_id=user_id, limit=500)
+    spending_docs = await spending_repo.get_transactions(user_id=user_id, limit=500, sort_by_date=False)
     spend_total = round(sum(x.get("amount", 0) for x in spending_docs), 2)
     by_category: dict[str, float] = {}
     for row in spending_docs:
