@@ -21,5 +21,13 @@ class AgentRepository(BaseRepository):
             upsert=True
         )
 
+    async def get_user_subscriptions(self, email: str) -> list[dict]:
+        """Get all subscriptions for a user."""
+        return await self.db["subscriptions"].find({"user_email": email}).to_list(100)
+
+    async def create_subscription(self, doc: dict) -> None:
+        """Create a new subscription."""
+        await self.db["subscriptions"].insert_one(doc)
+
 def get_agent_repo() -> AgentRepository:
     return AgentRepository()

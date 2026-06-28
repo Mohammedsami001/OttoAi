@@ -1,7 +1,8 @@
 from typing import Any
 
-from main.db import mongo_manager
 from main.security import decrypt_value
+from main.repositories.integrations import get_integrations_repo
+from main.repositories.spending import get_spending_repo
 
 
 def _safe_decrypt(value: str | None) -> str:
@@ -14,7 +15,8 @@ def _safe_decrypt(value: str | None) -> str:
 
 
 async def get_user_integration_doc(user_id: str) -> dict[str, Any]:
-    doc = await mongo_manager.user_integrations.find_one({"user_id": user_id})
+    repo = get_integrations_repo()
+    doc = await repo.get_by_user_id(user_id)
     return doc or {}
 
 
@@ -25,7 +27,8 @@ async def get_user_token(user_id: str, field: str) -> str:
 
 
 async def get_spending_keys(user_id: str) -> dict[str, str]:
-    doc = await mongo_manager.spending_api_keys.find_one({"user_id": user_id}) or {}
+    repo = get_spending_repo()
+    doc = await repo.get_spending_api_keys(user_id)
     return {
         "razorpay_key_id": _safe_decrypt(doc.get("razorpay_key_id")),
         "razorpay_key_secret": _safe_decrypt(doc.get("razorpay_key_secret")),
