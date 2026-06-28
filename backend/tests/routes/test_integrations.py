@@ -9,6 +9,11 @@ from main.repositories.integrations import IntegrationsRepository, get_integrati
 def override_get_user_id():
     return "test_user_1"
 
+@pytest.fixture(autouse=True)
+def clear_overrides():
+    yield
+    app.dependency_overrides.clear()
+
 def test_integration_status_empty(monkeypatch):
     mock_repo = MagicMock(spec=IntegrationsRepository)
     mock_repo.get_by_user_id = AsyncMock(return_value=None)

@@ -8,12 +8,12 @@ class IntegrationsRepository(BaseRepository):
     async def update_integration(self, user_id: str, updates: dict) -> None:
         from datetime import datetime, timezone
         
-        updates["updated_at"] = datetime.now(timezone.utc)
+        update_fields = {**updates, "updated_at": datetime.now(timezone.utc)}
         
         await self.db["user_integrations"].update_one(
             {"user_id": user_id},
             {
-                "$set": updates,
+                "$set": update_fields,
                 "$setOnInsert": {"user_id": user_id},
             },
             upsert=True,
