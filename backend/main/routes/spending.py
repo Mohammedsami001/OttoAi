@@ -145,7 +145,7 @@ async def get_subscriptions(user_id: str = Depends(get_user_id)):
 
 
 @router.post("/subscriptions")
-async def create_subscription(sub: Subscription):
+async def create_subscription(sub: Subscription, user_id: str = Depends(get_user_id)):
     agent_repo = get_agent_repo()
 
     doc = sub.dict()
