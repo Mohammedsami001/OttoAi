@@ -67,3 +67,67 @@ async def test_fetch_gmail_messages():
         assert emails[0]["snippet"] == "Test snippet"
         
         assert mock_get.call_count == 2
+
+@pytest.mark.asyncio
+async def test_get_calendar_events():
+    client = GoogleClient(client_id="test_id", client_secret="test_secret")
+    
+    with patch("httpx.AsyncClient") as MockClient:
+        mock_get = AsyncMock()
+        mock_res = MagicMock()
+        mock_res.status_code = 200
+        mock_res.json.return_value = {
+            "items": [
+                {
+                    "summary": "Meeting",
+                    "start": {"dateTime": "2026-06-29T10:00:00Z"},
+                    "location": "Zoom",
+                    "hangoutLink": "https://meet.google.com/test"
+                }
+            ]
+        }
+        mock_get.return_value = mock_res
+        
+        mock_instance = MockClient.return_value.__aenter__.return_value
+        mock_instance.get = mock_get
+
+        events = await client.get_calendar_events("acc_tok", "min_time", "max_time")
+        
+        assert len(events) == 1
+        assert events[0]["title"] == "Meeting"
+        assert events[0]["start"] == "2026-06-29T10:00:00Z"
+        assert events[0]["location"] == "Zoom"
+        assert events[0]["meet_link"] == "https://meet.google.com/test"
+
+@pytest.mark.asyncio
+async def test_get_recent_docs():
+    client = GoogleClient(client_id="test_id", client_secret="test_secret")
+    
+    with patch("httpx.AsyncClient") as MockClient:
+        mock_get = AsyncMock()
+        mock_res = MagicMock()
+        mock_res.status_code = 200
+        mock_res.json.return_value = {
+            "files": [
+                {
+                    "name": "Doc 1",
+                    "owners": [{"displayName": "Alice"}],
+                    "modifiedTime": "2026-06-29T10:00:00Z",
+                    "shared": True,
+                    "webViewLink": "https://docs.google.com/test"
+                }
+            ]
+        }
+        mock_get.return_value = mock_res
+        
+        mock_instance = MockClient.return_value.__aenter__.return_value
+        mock_instance.get = mock_get
+
+        docs = await client.get_recent_docs("acc_tok", 10)
+        
+        assert len(docs) == 1
+        assert docs[0]["name"] == "Doc 1"
+        assert docs[0]["owner"] == "Alice"
+        assert docs[0]["last_modified"] == "2026-06-29T10:00:00Z"
+        assert docs[0]["shared"] is True
+        assert docs[0]["link"] == "https://docs.google.com/test"

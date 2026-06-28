@@ -12,6 +12,8 @@ from main.services.slack import get_slack_unread_summary
 from main.services.calendar import get_upcoming_events
 from main.services.meet import get_scheduled_meetings
 from main.services.docs import get_recent_docs
+from main.services.agent import GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET
+from main.adapters.google_client import GoogleClient
 from main.services.whatsapp import build_daily_briefing, send_whatsapp_message
 
 from main.repositories.integrations import get_integrations_repo
@@ -95,8 +97,9 @@ def sync_calendar_events():
         users = await _user_ids()
         today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
         repo = get_daily_summaries_repo()
+        google_client = GoogleClient(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET)
         for user_id in users:
-            calendar = await get_upcoming_events(user_id)
+            calendar = await get_upcoming_events(user_id, google_client=google_client)
             meet = await get_scheduled_meetings(user_id, calendar.get("upcoming_events", []))
             await repo.upsert_daily_summary(user_id, today, {"calendar": calendar, "meet": meet})
 
@@ -108,8 +111,9 @@ def sync_docs():
         users = await _user_ids()
         today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
         repo = get_daily_summaries_repo()
+        google_client = GoogleClient(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET)
         for user_id in users:
-            docs = await get_recent_docs(user_id)
+            docs = await get_recent_docs(user_id, google_client=google_client)
             await repo.upsert_daily_summary(user_id, today, {"docs": docs})
 
     return _run(_task())
@@ -120,13 +124,14 @@ def send_daily_briefing():
         users = await _user_ids()
         today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
         repo = get_daily_summaries_repo()
+        google_client = GoogleClient(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET)
         for user_id in users:
             spending = await _get_spending_snapshot(user_id)
             gmail = await get_gmail_unread_summary(user_id)
             slack = await get_slack_unread_summary(user_id)
-            calendar = await get_upcoming_events(user_id)
+            calendar = await get_upcoming_events(user_id, google_client=google_client)
             meet = await get_scheduled_meetings(user_id, calendar.get("upcoming_events", []))
-            docs = await get_recent_docs(user_id)
+            docs = await get_recent_docs(user_id, google_client=google_client)
 
             payload = {
                 "spending": spending,

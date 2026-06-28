@@ -44,3 +44,30 @@ async def test_upsert_subscription_alert():
         {"$set": {"alert": "yes"}},
         upsert=True
     )
+
+@pytest.mark.asyncio
+async def test_get_user_subscriptions():
+    db_mock = MagicMock()
+    cursor_mock = AsyncMock()
+    cursor_mock.to_list = AsyncMock(return_value=[{"_id": "sub1"}])
+    db_mock.__getitem__.return_value.find.return_value = cursor_mock
+    
+    repo = AgentRepository(db_mock)
+    subs = await repo.get_user_subscriptions("test@example.com")
+    
+    db_mock.__getitem__.assert_called_with("subscriptions")
+    db_mock.__getitem__.return_value.find.assert_called_with({"user_email": "test@example.com"})
+    assert len(subs) == 1
+    assert subs[0]["_id"] == "sub1"
+
+@pytest.mark.asyncio
+async def test_create_subscription():
+    db_mock = MagicMock()
+    db_mock.__getitem__.return_value.insert_one = AsyncMock()
+    
+    repo = AgentRepository(db_mock)
+    await repo.create_subscription({"name": "Netflix"})
+    
+    db_mock.__getitem__.assert_called_with("subscriptions")
+    db_mock.__getitem__.return_value.insert_one.assert_called_with({"name": "Netflix"})
+

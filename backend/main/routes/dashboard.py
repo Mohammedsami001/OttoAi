@@ -10,6 +10,8 @@ from main.services.docs import get_recent_docs
 from main.services.gmail import get_gmail_unread_summary
 from main.services.meet import get_scheduled_meetings
 from main.services.slack import get_slack_unread_summary
+from main.adapters.google_client import GoogleClient
+from main.services.agent import GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET
 
 router = APIRouter(prefix="/dashboard", tags=["dashboard"])
 
@@ -32,11 +34,12 @@ async def dashboard_summary(
     top_category = max(by_category, key=by_category.get) if by_category else "other"
 
     # Services could also be refactored eventually, but for Issue 1 we mock them if needed
+    google_client = GoogleClient(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET)
     gmail = await get_gmail_unread_summary(user_id)
     slack = await get_slack_unread_summary(user_id)
-    calendar = await get_upcoming_events(user_id)
+    calendar = await get_upcoming_events(user_id, google_client=google_client)
     meet = await get_scheduled_meetings(user_id, calendar.get("upcoming_events", []))
-    docs = await get_recent_docs(user_id)
+    docs = await get_recent_docs(user_id, google_client=google_client)
 
     integration_doc = await integrations_repo.get_by_user_id(user_id)
     integration_status = {

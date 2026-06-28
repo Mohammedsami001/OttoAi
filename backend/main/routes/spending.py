@@ -6,6 +6,8 @@ from main.dependencies import get_user_id
 from main.models import ConnectGPayRequest, ConnectRazorpayRequest, Subscription
 from main.security import encrypt_value
 from main.services.spending import categorize_transaction, fetch_gpay_transactions, fetch_razorpay_transactions
+from main.repositories.accounts import get_accounts_repo
+from main.repositories.agent import get_agent_repo
 
 router = APIRouter(prefix="/spending", tags=["spending"])
 
@@ -130,18 +132,24 @@ async def sync_spending(user_id: str = Depends(get_user_id)):
 
 @router.get("/subscriptions")
 async def get_subscriptions(user_id: str = Depends(get_user_id)):
-    user = await mongo_manager.client["personal-ops"]["users"].find_one({"_id": user_id})
+    accounts_repo = get_accounts_repo()
+    agent_repo = get_agent_repo()
+
+    user = await accounts_repo.get_user_by_id(user_id)
     email = user.get("email") if user else user_id
     
-    docs = await mongo_manager.client["personal-ops"]["subscriptions"].find({"user_email": email}).to_list(100)
+    docs = await agent_repo.get_user_subscriptions(email)
     for doc in docs:
         doc["_id"] = str(doc["_id"])
     return {"items": docs}
 
 
 @router.post("/subscriptions")
-async def create_subscription(sub: Subscription):
+async def create_subscription(sub: Subscription, user_id: str = Depends(get_user_id)):
+    agent_repo = get_agent_repo()
+
     doc = sub.dict()
-    await mongo_manager.client["personal-ops"]["subscriptions"].insert_one(doc)
+    # Pydantic may already exclude unset, but let's just make sure _id isn't randomly generated unless mongo does it
+    await agent_repo.create_subscription(doc)
     doc["_id"] = str(doc["_id"])
     return doc

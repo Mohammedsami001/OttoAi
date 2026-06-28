@@ -26,3 +26,16 @@ async def test_get_transactions_builds_correct_query():
     assert result == [{"amount": 100}]
     mock_collection.find.assert_called_once_with({"user_id": "user123", "category": "food"})
     mock_cursor.sort.assert_called_once_with("date", -1)
+
+@pytest.mark.asyncio
+async def test_get_spending_api_keys():
+    from main.repositories.spending import SpendingRepository
+    db_mock = MagicMock()
+    db_mock.__getitem__.return_value.find_one = AsyncMock(return_value={"api_key": "123"})
+    
+    repo = SpendingRepository(db_mock)
+    doc = await repo.get_spending_api_keys("user1")
+    
+    db_mock.__getitem__.assert_called_with("spending_api_keys")
+    db_mock.__getitem__.return_value.find_one.assert_called_with({"user_id": "user1"})
+    assert doc == {"api_key": "123"}

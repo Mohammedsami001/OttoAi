@@ -34,5 +34,8 @@ class SpendingRepository(BaseRepository):
             },
         )
 
+    async def get_spending_api_keys(self, user_id: str) -> dict:
+        return await self.db["spending_api_keys"].find_one({"user_id": user_id}) or {}
+
 def get_spending_repo() -> SpendingRepository:
     return SpendingRepository()
