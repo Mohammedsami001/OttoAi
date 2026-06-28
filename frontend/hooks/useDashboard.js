@@ -1,8 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000"
+import { dashboardService } from "../lib/api/dashboardService"
 
 export default function useDashboard() {
   const [data, setData] = useState(null)
@@ -12,20 +11,15 @@ export default function useDashboard() {
   useEffect(() => {
     const run = async () => {
       try {
-        const [summaryRes, categoriesRes] = await Promise.all([
-          fetch(`${API_BASE}/dashboard/summary`, {
-            headers: { "x-user-id": "demo-user" },
-            cache: "no-store"
-          }),
-          fetch(`${API_BASE}/spending/categories`, {
-            headers: { "x-user-id": "demo-user" },
-            cache: "no-store"
-          })
+        const userId = "demo-user" // hardcoded for demo, normally from auth context
+        const [summaryBody, categoriesBody] = await Promise.all([
+          dashboardService.getSummary(userId),
+          dashboardService.getCategories(userId)
         ])
-        const body = await summaryRes.json()
-        const categoriesBody = await categoriesRes.json()
-        setData(body)
+        setData(summaryBody)
         setCategories(categoriesBody.items || [])
+      } catch (err) {
+        console.error(err)
       } finally {
         setLoading(false)
       }
